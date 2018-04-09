@@ -340,21 +340,53 @@ add_definitions( -DGC_VIDEO_NONE )
 ###======================================================
 
 # Prefer Qt 5
-option(USE_QT5 "Use Qt5 instead of Qt4." ON)
+option(USE_QT5 "Use Qt5 (instead of Qt4)." ON)
 
 if (USE_QT5)
-  find_package (Qt5Widgets REQUIRED)
+  find_package (Qt5Widgets 5.8 REQUIRED)
   find_package (Qt5Core REQUIRED)
+  find_package (Qt5Xml REQUIRED)
+  find_package (Qt5Sql REQUIRED)
+  find_package (Qt5Network REQUIRED)
+  find_package (Qt5Svg REQUIRED)
   find_package (Qt5Concurrent REQUIRED)
   #find_package (Qt5SerialPort REQUIRED)
   find_package(Qt5Core COMPONENTS Qt5SerialPort REQUIRED)
   find_package (Qt5MultimediaWidgets REQUIRED)
   #find_package (Qt5PrintSupport REQUIRED)
+
+  ## Always add debug information for Windows, MSVC
+  #win32-msvc* { CONFIG += force_debug_info }
+  
+  ## If building with QT5 there is experimental suport for building
+  ## with WebEngine now that WebKit is deprecated in QT 5.6
+  ## It brings in a LOT of dependencies !
+  if (NOWEBKIT AND NOT ${Qt5Widgets_VERSION} LESS 5.6) # We require Qt >= 5.8 so we could skip the 2nd test here.
+    #CONFIG += c++11
+    find_package (Qt5WebEngine REQUIRED)
+    find_package (Qt5WebEngineCore REQUIRED)
+    find_package (Qt5WebEngineWidgets REQUIRED)
+    find_package (Qt5WebChannel REQUIRED)
+    find_package (Qt5Positioning REQUIRED)
+  else (NOWEBKIT AND NOT ${Qt5Widgets_VERSION} LESS 5.6)
+    # On 5.5 or earlier we can still use WebKit
+    find_package (Qt5WebKitWidgets)
+  endif (NOWEBKIT AND NOT ${Qt5Widgets_VERSION} LESS 5.6)
+  
+  if (APPLE)
+    ## need mac extras and clang++ needs to know which stdlib to link with
+    #QT += macextras webengine webenginecore webenginewidgets positioning
+  else (APPLE)
+    
+  endif (APPLE)
+  
   set(CMAKE_AUTOMOC ON)
   set(CMAKE_AUTOUIC ON)
   message (STATUS "Qt version: ${Qt5Widgets_VERSION}")
-  add_definitions( -DUSE_QT5 ) 
-else (USE_QT5)
+
+  #add_definitions( -DUSE_QT5 ) 
+
+else (USE_QT5) # Qt 4
   find_package (Qt4 REQUIRED)
 endif (USE_QT5)
 
@@ -408,7 +440,7 @@ if (WIN32)
   
 else (WIN32)
   # QWT is configured to build 1 lib for all other OS (see qwtbuild.pri)
- # LIBS += -L$${PWD}/../qwt/lib -lqwt
+  # LIBS += -L$${PWD}/../qwt/lib -lqwt
 endif (WIN32)
 
 #
