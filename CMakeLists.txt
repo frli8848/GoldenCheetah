@@ -551,6 +551,15 @@ else (APPLE)
 
 endif (APPLE)
 
+#### these are no longer non-mac only
+set (GC_HEADER_FILES ${GC_HEADER_FILES}
+  qtsolutions/segmentcontrol/qtsegmentcontrol.h
+  )
+
+set (GC_SOURCE_FILES ${GC_SOURCE_FILES}
+  qtsolutions/segmentcontrol/qtsegmentcontrol.cpp
+  )
+
 ###=================
 ### LANGUAGE SUPPORT
 ###=================
@@ -1041,20 +1050,211 @@ endif (USE_CloudDB)
 #                                                                             #
 ###############################################################################
 
+###===========================================
+### FEATURES ENABLED WHEN HAVE QT5 [or higher]
+###===========================================
 
-# Qt 5
+set (GC_HEADER_FILES)
+
+if (Qt5Widgets_VERSION GREATER_EQUAL 5) 
+
+  # Features that only work with QT5 or higher
+  #SOURCES += Cloud/Dropbox.cpp
+  #HEADERS += Cloud/Dropbox.h
+  #SOURCES += Cloud/GoogleDrive.cpp Cloud/KentUniversity.cpp
+  #HEADERS += Cloud/GoogleDrive.h Cloud/KentUniversity.h
+  #SOURCES += Cloud/OpenData.cpp
+  #HEADERS += Cloud/OpenData.h
+
+  if (Qt5Widgets_VERSION GREATER_EQUAL 5.4) 
+    
+    #SOURCES += Cloud/SixCycle.cpp
+    #HEADERS += Cloud/SixCycle.h
+    #SOURCES += Cloud/PolarFlow.cpp
+    #HEADERS += Cloud/PolarFlow.h
+    #SOURCES += Cloud/SportTracks.cpp
+    #HEADERS += Cloud/SportTracks.h
+    #SOURCES += Cloud/TodaysPlan.cpp
+    #HEADERS += Cloud/TodaysPlan.h
+  endif (Qt5Widgets_VERSION GREATER_EQUAL 5.4) 
+
+  #SOURCES += Train/MonarkController.cpp Train/MonarkConnection.cpp
+  #HEADERS += Train/MonarkController.h Train/MonarkConnection.h
+  #SOURCES += Train/Kettler.cpp Train/KettlerController.cpp Train/KettlerConnection.cpp
+  #HEADERS += Train/Kettler.h Train/KettlerController.h Train/KettlerConnection.h
+  #SOURCES += Train/KettlerRacer.cpp Train/KettlerRacerController.cpp Train/KettlerRacerConnection.cpp
+  #HEADERS += Train/KettlerRacer.h Train/KettlerRacerController.h Train/KettlerRacerConnection.h
+  
+  # bluetooth in QT5.5 or higher(5.4 was only a tech preview)
+  if (Qt5Widgets_VERSION GREATER_EQUAL 5.5) 
+    #greaterThan(QT_MINOR_VERSION, 4) {
+    #QT += bluetooth
+    #HEADERS += Train/BT40Controller.h Train/BT40Device.h
+    #SOURCES += Train/BT40Controller.cpp Train/BT40Device.cpp
+  endif (Qt5Widgets_VERSION GREATER_EQUAL 5.5) 
+  
+    # qt charts is officially supported from QT5.8 or higher
+    # in 5.7 it is a tech preview and not always available
+    if (Qt5Widgets_VERSION GREATER_EQUAL 5.8) 
+    #greaterThan(QT_MINOR_VERSION, 7) {
+    #QT += charts opengl
+    
+    # Dashboard uses qt charts, so needs at least Qt 5.7
+    #DEFINES += GC_HAVE_OVERVIEW
+    #HEADERS += Charts/OverviewWindow.h
+    #SOURCES += Charts/OverviewWindow.cpp
+    
+  endif (Qt5Widgets_VERSION GREATER_EQUAL 5.8) 
+  
+endif(Qt5Widgets_VERSION GREATER_EQUAL 5) 
+
+
+###=====================
+### LEX AND YACC SOURCES
+###=====================
+
+#YACCSOURCES += Core/DataFilter.y \
+#               FileIO/JsonRideFile.y \
+#               Core/RideDB.y
+
+#LEXSOURCES  += Core/DataFilter.l \
+#               FileIO/JsonRideFile.l \
+#               Core/RideDB.l
+
+
+###=========================================
+### HEADER FILES [scanned by qmake, for moc]
+###=========================================
+
+# ANT+
+set (GC_HEADER_FILES ${GC_HEADER_FILES}
+  src/ANT/ANTChannel.h src/ANT/ANT.h src/ANT/ANTlocalController.h src/ANT/ANTLogger.h src/ANT/ANTMessage.h src/ANT/ANTMessages.h)
+
+# Charts and associated widgets
+set (GC_HEADER_FILES ${GC_HEADER_FILES}
+  src/Charts/Aerolab.h src/Charts/AerolabWindow.h src/Charts/AllPlot.h src/Charts/AllPlotInterval.h src/Charts/AllPlotSlopeCurve.h
+  src/Charts/AllPlotWindow.h src/Charts/BlankState.h src/Charts/ChartBar.h src/Charts/ChartSettings.h
+  src/Charts/CpPlotCurve.h src/Charts/CPPlot.h src/Charts/CriticalPowerWindow.h src/Charts/DaysScaleDraw.h src/Charts/ExhaustionDialog.h src/Charts/GcOverlayWidget.h
+  src/Charts/GcPane.h src/Charts/GoldenCheetah.h src/Charts/HistogramWindow.h src/Charts/HomeWindow.h
+  src/Charts/HrPwPlot.h src/Charts/HrPwWindow.h src/Charts/IndendPlotMarker.h src/Charts/IntervalSummaryWindow.h src/Charts/LogTimeScaleDraw.h
+  src/Charts/LTMCanvasPicker.h src/Charts/LTMChartParser.h src/Charts/LTMOutliers.h src/Charts/LTMPlot.h src/Charts/LTMPopup.h
+  src/Charts/LTMSettings.h src/Charts/LTMTool.h src/Charts/LTMTrend2.h src/Charts/LTMTrend.h src/Charts/LTMWindow.h
+  src/Charts/MetadataWindow.h src/Charts/MUPlot.h src/Charts/MUPool.h src/Charts/MUWidget.h src/Charts/PfPvPlot.h src/Charts/PfPvWindow.h
+  src/Charts/PowerHist.h src/Charts/ReferenceLineDialog.h src/Charts/RideEditor.h src/Charts/RideMapWindow.h src/Charts/RideSummaryWindow.h
+  src/Charts/ScatterPlot.h src/Charts/ScatterWindow.h src/Charts/SmallPlot.h src/Charts/SummaryWindow.h src/Charts/TreeMapPlot.h
+  src/Charts/TreeMapWindow.h src/Charts/ZoneScaleDraw.h
+  )
+
+# RideWindow temporarily disabled if we don't have WebKit
+if (NOWEBKIT)
+  set (GC_HEADER_FILES ${GC_HEADER_FILES}
+    src/Charts/RideWindow.h
+    )
+endif (NOWEBKIT)
+
+# cloud services
+set (GC_HEADER_FILES ${GC_HEADER_FILES}
+  src/Cloud/BodyMeasuresDownload.h src/Cloud/CalendarDownload.h src/Cloud/CloudService.h src/Cloud/LocalFileStore.h
+  src/Cloud/OAuthDialog.h src/Cloud/OAuthManager.h src/Cloud/TodaysPlanBodyMeasures.h src/Cloud/WithingsDownload.h
+  src/Cloud/Strava.h src/Cloud/CyclingAnalytics.h src/Cloud/RideWithGPS.h src/Cloud/TrainingsTageBuch.h
+  src/Cloud/Selfloops.h src/Cloud/Velohero.h src/Cloud/SportsPlusHealth.h src/Cloud/AddCloudWizard.h
+  src/Cloud/Withings.h src/Cloud/HrvMeasuresDownload.h src/Cloud/Xert.h
+  )
+
+# core data
+set (GC_HEADER_FILES ${GC_HEADER_FILES}
+  src/Core/Athlete.h src/Core/Context.h src/Core/DataFilter.h src/Core/FreeSearch.h src/Core/GcCalendarModel.h src/Core/GcUpgrade.h
+  src/Core/IdleTimer.h src/Core/IntervalItem.h src/Core/NamedSearch.h src/Core/RideCache.h src/Core/RideCacheModel.h src/Core/RideDB.h
+  src/Core/RideItem.h src/Core/Route.h src/Core/RouteParser.h src/Core/Season.h src/Core/SeasonParser.h src/Core/Secrets.h src/Core/Settings.h
+  src/Core/Specification.h src/Core/TimeUtils.h src/Core/Units.h src/Core/UserData.h src/Core/Utils.h
+  src/Core/Measures.h src/Core/BodyMeasures.h src/Core/HrvMeasures.h
+  )
+
+# device and file IO or edit
+set (GC_HEADER_FILES ${GC_HEADER_FILES}
+  src/FileIO/ArchiveFile.h src/FileIO/AthleteBackup.h  src/FileIO/Bin2RideFile.h src/FileIO/BinRideFile.h
+  src/FileIO/BodyMeasuresCsvImport.h src/FileIO/CommPort.h
+  src/FileIO/Computrainer3dpFile.h src/FileIO/CsvRideFile.h src/FileIO/DataProcessor.h src/FileIO/Device.h
+  src/FileIO/FitlogParser.h src/FileIO/FitlogRideFile.h src/FileIO/FitRideFile.h src/FileIO/GcRideFile.h src/FileIO/GpxParser.h
+  src/FileIO/GpxRideFile.h src/FileIO/JouleDevice.h src/FileIO/JsonRideFile.h src/FileIO/LapsEditor.h src/FileIO/MacroDevice.h
+  src/FileIO/ManualRideFile.h src/FileIO/MoxyDevice.h src/FileIO/PolarRideFile.h
+  src/FileIO/PowerTapDevice.h src/FileIO/PowerTapUtil.h src/FileIO/PwxRideFile.h src/FileIO/QuarqParser.h src/FileIO/QuarqRideFile.h
+  src/FileIO/RawRideFile.h src/FileIO/RideAutoImportConfig.h src/FileIO/RideFileCache.h
+  src/FileIO/RideFileCommand.h src/FileIO/RideFile.h src/FileIO/RideFileTableModel.h  src/FileIO/Serial.h
+  src/FileIO/SlfParser.h src/FileIO/SlfRideFile.h src/FileIO/SmfParser.h src/FileIO/SmfRideFile.h src/FileIO/SmlParser.h
+  src/FileIO/SmlRideFile.h src/FileIO/SrdRideFile.h src/FileIO/SrmRideFile.h src/FileIO/SyncRideFile.h src/FileIO/TcxParser.h
+  src/FileIO/TcxRideFile.h src/FileIO/TxtRideFile.h src/FileIO/WkoRideFile.h src/FileIO/XDataDialog.h src/FileIO/XDataTableModel.h
+  src/FileIO/FilterHRV.h src/FileIO/HrvMeasuresCsvImport.h
+  )
+
+# GUI components
+set (GC_HEADER_FILES ${GC_HEADER_FILES}
+  src/Gui/AboutDialog.h src/Gui/AddIntervalDialog.h src/Gui/AnalysisSidebar.h src/Gui/ChooseCyclistDialog.h src/Gui/ColorButton.h
+  src/Gui/Colors.h src/Gui/CompareDateRange.h src/Gui/CompareInterval.h src/Gui/ComparePane.h src/Gui/ConfigDialog.h src/Gui/DiarySidebar.h
+  src/Gui/DragBar.h src/Gui/EstimateCPDialog.h src/Gui/GcCrashDialog.h src/Gui/GcScopeBar.h src/Gui/GcSideBarItem.h src/Gui/GcToolBar.h src/Gui/GcWindowLayout.h
+  src/Gui/GcWindowRegistry.h src/Gui/GenerateHeatMapDialog.h src/Gui/GProgressDialog.h src/Gui/HelpWhatsThis.h src/Gui/HelpWindow.h
+  src/Gui/IntervalTreeView.h src/Gui/LTMSidebar.h src/Gui/MainWindow.h src/Gui/NewCyclistDialog.h src/Gui/Pages.h src/Gui/RideNavigator.h src/Gui/RideNavigatorProxy.h
+  src/Gui/SaveDialogs.h src/Gui/SearchBox.h src/Gui/SearchFilterBox.h src/Gui/SolveCPDialog.h src/Gui/Tab.h src/Gui/TabView.h src/Gui/ToolsRhoEstimator.h
+  src/Gui/Views.h src/Gui/BatchExportDialog.h src/Gui/DownloadRideDialog.h src/Gui/ManualRideDialog.h
+  src/Gui/MergeActivityWizard.h src/Gui/RideImportWizard.h src/Gui/SplitActivityWizard.h src/Gui/SolverDisplay.h
+  )
+
+# metrics and models
+set (GC_HEADER_FILES ${GC_HEADER_FILES}
+  src/Metrics/CPSolver.h src/Metrics/Estimator.h src/Metrics/ExtendedCriticalPower.h src/Metrics/HrZones.h src/Metrics/PaceZones.h src/Metrics/PDModel.h
+  src/Metrics/PMCData.h src/Metrics/RideMetadata.h src/Metrics/RideMetric.h src/Metrics/SpecialFields.h src/Metrics/Statistic.h
+  src/Metrics/UserMetricParser.h src/Metrics/UserMetricSettings.h src/Metrics/VDOTCalculator.h src/Metrics/WPrime.h src/Metrics/Zones.h
+  )
+
+## Planning and Compliance
+set (GC_HEADER_FILES ${GC_HEADER_FILES}
+  src/Planning/PlanningWindow.h
+  )
+
+# contrib
+set (GC_HEADER_FILES ${GC_HEADER_FILES}
+  qtsolutions/codeeditor/codeeditor.h qtsolutions/json/mvjson.h qtsolutions/qwtcurve/qwt_plot_gapped_curve.h
+  qxt/src/qxtspanslider.h qxt/src/qxtspanslider_p.h qxt/src/qxtstringspinbox.h qzip/zipreader.h
+  qzip/zipwriter.h
+  )
+
+# Train View
+set (GC_HEADER_FILES ${GC_HEADER_FILES}
+  src/Train/AddDeviceWizard.h src/Train/CalibrationData.h src/Train/ComputrainerController.h src/Train/Computrainer.h src/Train/DeviceConfiguration.h
+  src/Train/DeviceTypes.h src/Train/DialWindow.h src/Train/ErgDBDownloadDialog.h src/Train/ErgDB.h src/Train/ErgFile.h src/Train/ErgFilePlot.h
+  src/Train/Library.h src/Train/LibraryParser.h src/Train/MeterWidget.h src/Train/NullController.h src/Train/RealtimeController.h
+  src/Train/RealtimeData.h src/Train/RealtimePlot.h src/Train/RealtimePlotWindow.h src/Train/RemoteControl.h src/Train/SpinScanPlot.h
+  src/Train/SpinScanPlotWindow.h src/Train/SpinScanPolarPlot.h src/Train/GarminServiceHelper.h
+  )
+
 if (USE_QT5)
+  set (GC_HEADER_FILES ${GC_HEADER_FILES}
+    src/Train/TodaysPlanWorkoutDownload.h
+    )
+endif (USE_QT5)
+
+set (GC_HEADER_FILES ${GC_HEADER_FILES}
+  src/Train/TrainBottom.h src/Train/TrainDB.h src/Train/TrainSidebar.h
+  src/Train/VideoLayoutParser.h src/Train/VideoSyncFile.h src/Train/WorkoutPlotWindow.h src/Train/WebPageWindow.h 
+  src/Train/WorkoutWidget.h src/Train/WorkoutWidgetItems.h src/Train/WorkoutWindow.h src/Train/WorkoutWizard.h src/Train/ZwoParser.h
+  )
+
+if (USE_QT5) # Qt 5
+  
   #qt5_wrap_ui (GC_FORMS_HEADER_FILES ${GC_FORMS})
   #qt5_wrap_cpp (GC_HEADER_FILES_MOC ${GC_HEADER_FILES})
-  set (GC_FORMS_HEADER_FILES ${GC_FORMS}) # We use AUTOMUIC ON
+  #set (GC_FORMS_HEADER_FILES ${GC_FORMS}) # We use AUTOMUIC ON
   set (GC_HEADER_FILES_MOC ${GC_HEADER_FILES}) # We use AUTOMOC ON
   set (QWT_HEADER_FILES_MOC ${QWT_HEADER_FILES}) # We use AUTOMOC ON
   set (QXT_HEADER_FILES_MOC ${QXT_HEADER_FILES}) # We use AUTOMOC ON
+
 else (USE_QT5) # Qt 4
+
   #qt4_wrap_ui(GC_FORMS_HEADER_FILES ${GC_FORMS})
   qt4_wrap_cpp (GC_HEADER_FILES_MOC ${GC_HEADER_FILES})
   qt4_wrap_cpp (QWT_HEADER_FILES_MOC ${QWT_HEADER_FILES})
   qt4_wrap_cpp (QXT_HEADER_FILES_MOC ${QXT_HEADER_FILES})
+
 endif (USE_QT5)
 
 include_directories (
@@ -1070,18 +1270,6 @@ include_directories (
   ${QWT_INCLUDE_DIR}
   ${QXT_INCLUDE_DIR}
   ${CMAKE_CURRENT_BINARY_DIR} # May be needed to ui_*.h files (see https://anteru.net/2009/09/07/582/).
-  )
-
-set (GC_HEADER_FILES
-  src/Gui/QTFullScreen.h
-  src/Train/VideoWindow.h
-  qtsolutions/segmentcontrol/qtsegmentcontrol.h
-  )
-
-set (GC_SOURCE_FILES
-  src/Gui/QTFullScreen.cpp
-  src/Train/VideoWindow.cpp
-  qtsolutions/segmentcontrol/qtsegmentcontrol.cpp
   )
 
 if (USE_QT5)
