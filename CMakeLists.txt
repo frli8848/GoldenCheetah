@@ -1239,6 +1239,141 @@ set (GC_HEADER_FILES ${GC_HEADER_FILES}
   src/Train/WorkoutWidget.h src/Train/WorkoutWidgetItems.h src/Train/WorkoutWindow.h src/Train/WorkoutWizard.h src/Train/ZwoParser.h
   )
 
+
+###=============
+### SOURCE FILES
+###=============
+
+## ANT+
+set (GC_SOURCE_FILES ${GC_SOURCE_FILES}
+  src/ANT/ANTChannel.cpp src/ANT/ANT.cpp src/ANT/ANTlocalController.cpp src/ANT/ANTLogger.cpp src/ANT/ANTMessage.cpp
+  )
+
+## Charts and related
+set (GC_SOURCE_FILES ${GC_SOURCE_FILES}
+  src/Charts/Aerolab.cpp src/Charts/AerolabWindow.cpp src/Charts/AllPlot.cpp src/Charts/AllPlotInterval.cpp src/Charts/AllPlotSlopeCurve.cpp
+  src/Charts/AllPlotWindow.cpp src/Charts/BlankState.cpp src/Charts/ChartBar.cpp src/Charts/ChartSettings.cpp
+  src/Charts/CPPlot.cpp src/Charts/CpPlotCurve.cpp src/Charts/CriticalPowerWindow.cpp src/Charts/ExhaustionDialog.cpp src/Charts/GcOverlayWidget.cpp src/Charts/GcPane.cpp
+  src/Charts/GoldenCheetah.cpp src/Charts/HistogramWindow.cpp src/Charts/HomeWindow.cpp src/Charts/HrPwPlot.cpp
+  src/Charts/HrPwWindow.cpp src/Charts/IndendPlotMarker.cpp src/Charts/IntervalSummaryWindow.cpp src/Charts/LogTimeScaleDraw.cpp
+  src/Charts/LTMCanvasPicker.cpp src/Charts/LTMChartParser.cpp src/Charts/LTMOutliers.cpp src/Charts/LTMPlot.cpp src/Charts/LTMPopup.cpp
+  src/Charts/LTMSettings.cpp src/Charts/LTMTool.cpp src/Charts/LTMTrend.cpp src/Charts/LTMWindow.cpp
+  src/Charts/MetadataWindow.cpp src/Charts/MUPlot.cpp src/Charts/MUWidget.cpp src/Charts/PfPvPlot.cpp src/Charts/PfPvWindow.cpp
+  src/Charts/PowerHist.cpp src/Charts/ReferenceLineDialog.cpp src/Charts/RideEditor.cpp src/Charts/RideMapWindow.cpp src/Charts/RideSummaryWindow.cpp
+  src/Charts/ScatterPlot.cpp src/Charts/ScatterWindow.cpp src/Charts/SmallPlot.cpp src/Charts/SummaryWindow.cpp src/Charts/TreeMapPlot.cpp
+  src/Charts/TreeMapWindow.cpp
+  )
+
+# RideWindow temporarily disabled if we don't have WebKit
+if (NOWEBKIT)
+  set (GC_SOURCE_FILES ${GC_SOURCE_FILES}
+    src/Charts/RideWindow.cpp
+    )
+endif (NOWEBKIT)
+    
+## Cloud Services / Web resources
+set (GC_SOURCE_FILES ${GC_SOURCE_FILES}
+  src/Cloud/BodyMeasuresDownload.cpp src/Cloud/CalendarDownload.cpp src/Cloud/CloudService.cpp src/Cloud/LocalFileStore.cpp
+  src/Cloud/OAuthDialog.cpp src/Cloud/OAuthManager.cpp src/Cloud/TodaysPlanBodyMeasures.cpp src/Cloud/WithingsDownload.cpp
+  src/Cloud/Strava.cpp src/Cloud/CyclingAnalytics.cpp src/Cloud/RideWithGPS.cpp src/Cloud/TrainingsTageBuch.cpp
+  src/Cloud/Selfloops.cpp src/Cloud/Velohero.cpp src/Cloud/SportsPlusHealth.cpp src/Cloud/AddCloudWizard.cpp
+  src/Cloud/Withings.cpp src/Cloud/HrvMeasuresDownload.cpp src/Cloud/Xert.cpp
+  )
+
+## Core Data Structures
+set (GC_SOURCE_FILES ${GC_SOURCE_FILES}	   
+  src/Core/Athlete.cpp src/Core/Context.cpp src/Core/DataFilter.cpp src/Core/FreeSearch.cpp src/Core/GcUpgrade.cpp src/Core/IdleTimer.cpp
+  src/Core/IntervalItem.cpp src/Core/main.cpp src/Core/NamedSearch.cpp src/Core/RideCache.cpp src/Core/RideCacheModel.cpp src/Core/RideItem.cpp
+  src/Core/Route.cpp src/Core/RouteParser.cpp src/Core/Season.cpp src/Core/SeasonParser.cpp src/Core/Settings.cpp src/Core/Specification.cpp
+  src/Core/TimeUtils.cpp src/Core/Units.cpp src/Core/UserData.cpp src/Core/Utils.cpp
+  src/Core/Measures.cpp src/Core/BodyMeasures.cpp src/Core/HrvMeasures.cpp
+  )
+
+## File and Device IO and Editing
+set (GC_SOURCE_FILES ${GC_SOURCE_FILES}	 
+  src/FileIO/ArchiveFile.cpp src/FileIO/AthleteBackup.cpp src/FileIO/Bin2RideFile.cpp src/FileIO/BinRideFile.cpp
+  src/FileIO/BodyMeasuresCsvImport.cpp src/FileIO/CommPort.cpp
+  src/FileIO/Computrainer3dpFile.cpp src/FileIO/CsvRideFile.cpp src/FileIO/DataProcessor.cpp src/FileIO/Device.cpp
+  src/FileIO/FitlogParser.cpp src/FileIO/FitlogRideFile.cpp src/FileIO/FitRideFile.cpp src/FileIO/FixDeriveDistance.cpp
+  src/FileIO/FixDeriveHeadwind.cpp src/FileIO/FixDerivePower.cpp src/FileIO/FixDeriveTorque.cpp src/FileIO/FixElevation.cpp src/FileIO/FixLapSwim.cpp
+  src/FileIO/FixFreewheeling.cpp src/FileIO/FixGaps.cpp src/FileIO/FixGPS.cpp src/FileIO/FixRunningCadence.cpp src/FileIO/FixRunningPower.cpp
+  src/FileIO/FixHRSpikes.cpp src/FileIO/FixMoxy.cpp src/FileIO/FixPower.cpp src/FileIO/FixSmO2.cpp src/FileIO/FixSpeed.cpp src/FileIO/FixSpikes.cpp
+  src/FileIO/FixTorque.cpp src/FileIO/GcRideFile.cpp src/FileIO/GpxParser.cpp src/FileIO/GpxRideFile.cpp src/FileIO/JouleDevice.cpp src/FileIO/LapsEditor.cpp
+  src/FileIO/MacroDevice.cpp src/FileIO/ManualRideFile.cpp src/FileIO/MoxyDevice.cpp
+  src/FileIO/PolarRideFile.cpp src/FileIO/PowerTapDevice.cpp src/FileIO/PowerTapUtil.cpp src/FileIO/PwxRideFile.cpp src/FileIO/QuarqParser.cpp
+  src/FileIO/QuarqRideFile.cpp src/FileIO/RawRideFile.cpp src/FileIO/RideAutoImportConfig.cpp
+  src/FileIO/RideFileCache.cpp src/FileIO/RideFileCommand.cpp src/FileIO/RideFile.cpp src/FileIO/RideFileTableModel.cpp
+  src/FileIO/Serial.cpp src/FileIO/SlfParser.cpp src/FileIO/SlfRideFile.cpp src/FileIO/SmfParser.cpp src/FileIO/SmfRideFile.cpp src/FileIO/SmlParser.cpp
+  src/FileIO/SmlRideFile.cpp src/FileIO/Snippets.cpp src/FileIO/SrdRideFile.cpp src/FileIO/SrmRideFile.cpp src/FileIO/SyncRideFile.cpp
+  src/FileIO/TacxCafRideFile.cpp src/FileIO/TcxParser.cpp src/FileIO/TcxRideFile.cpp src/FileIO/TxtRideFile.cpp src/FileIO/WkoRideFile.cpp
+  src/FileIO/XDataDialog.cpp src/FileIO/XDataTableModel.cpp src/FileIO/FilterHRV.cpp src/FileIO/HrvMeasuresCsvImport.cpp
+  )
+
+## GUI Elements and Dialogs
+set (GC_SOURCE_FILES ${GC_SOURCE_FILES}
+  src/Gui/AboutDialog.cpp src/Gui/AddIntervalDialog.cpp src/Gui/AnalysisSidebar.cpp src/Gui/ChooseCyclistDialog.cpp src/Gui/ColorButton.cpp
+  src/Gui/Colors.cpp src/Gui/CompareDateRange.cpp src/Gui/CompareInterval.cpp src/Gui/ComparePane.cpp src/Gui/ConfigDialog.cpp src/Gui/DiarySidebar.cpp
+  src/Gui/DragBar.cpp src/Gui/EstimateCPDialog.cpp src/Gui/GcCrashDialog.cpp src/Gui/GcScopeBar.cpp
+  src/Gui/GcSideBarItem.cpp src/Gui/GcToolBar.cpp src/Gui/GcWindowLayout.cpp
+  src/Gui/GcWindowRegistry.cpp src/Gui/GenerateHeatMapDialog.cpp src/Gui/GProgressDialog.cpp src/Gui/HelpWhatsThis.cpp src/Gui/HelpWindow.cpp
+  src/Gui/IntervalTreeView.cpp src/Gui/LTMSidebar.cpp src/Gui/MainWindow.cpp src/Gui/NewCyclistDialog.cpp src/Gui/Pages.cpp
+  src/Gui/RideNavigator.cpp src/Gui/SaveDialogs.cpp
+  src/Gui/SearchBox.cpp src/Gui/SearchFilterBox.cpp src/Gui/SolveCPDialog.cpp src/Gui/Tab.cpp src/Gui/TabView.cpp src/Gui/ToolsRhoEstimator.cpp src/Gui/Views.cpp
+  src/Gui/BatchExportDialog.cpp src/Gui/DownloadRideDialog.cpp src/Gui/ManualRideDialog.cpp src/Gui/EditUserMetricDialog.cpp
+  src/Gui/MergeActivityWizard.cpp src/Gui/RideImportWizard.cpp src/Gui/SplitActivityWizard.cpp src/Gui/SolverDisplay.cpp
+  )
+
+## Models and Metrics
+set (GC_SOURCE_FILES ${GC_SOURCE_FILES}
+  src/Metrics/aBikeScore.cpp src/Metrics/aCoggan.cpp src/Metrics/AerobicDecoupling.cpp src/Metrics/BasicRideMetrics.cpp src/Metrics/BikeScore.cpp
+  src/Metrics/Coggan.cpp src/Metrics/CPSolver.cpp src/Metrics/DanielsPoints.cpp src/Metrics/Estimator.cpp src/Metrics/ExtendedCriticalPower.cpp
+  src/Metrics/GOVSS.cpp src/Metrics/HrTimeInZone.cpp src/Metrics/HrZones.cpp src/Metrics/LeftRightBalance.cpp src/Metrics/PaceTimeInZone.cpp
+  src/Metrics/PaceZones.cpp src/Metrics/PDModel.cpp src/Metrics/PeakPace.cpp src/Metrics/PeakPower.cpp src/Metrics/PMCData.cpp src/Metrics/RideMetadata.cpp
+  src/Metrics/RideMetric.cpp src/Metrics/RunMetrics.cpp src/Metrics/SwimMetrics.cpp src/Metrics/SpecialFields.cpp
+  src/Metrics/Statistic.cpp src/Metrics/SustainMetric.cpp src/Metrics/SwimScore.cpp
+  src/Metrics/TimeInZone.cpp src/Metrics/TRIMPPoints.cpp src/Metrics/UserMetric.cpp src/Metrics/UserMetricParser.cpp src/Metrics/VDOTCalculator.cpp
+  src/Metrics/VDOT.cpp src/Metrics/WattsPerKilogram.cpp src/Metrics/WPrime.cpp src/Metrics/Zones.cpp src/Metrics/HrvMetrics.cpp
+  )
+
+## Planning and Compliance
+set (GC_SOURCE_FILES ${GC_SOURCE_FILES}
+  src/Planning/PlanningWindow.cpp
+  )
+
+## Contributed solutions
+set (GC_SOURCE_FILES ${GC_SOURCE_FILES}
+  qtsolutions/codeeditor/codeeditor.cpp qtsolutions/json/mvjson.cpp qtsolutions/qwtcurve/qwt_plot_gapped_curve.cpp
+  qxt/src/qxtspanslider.cpp qxt/src/qxtstringspinbox.cpp qzip/zip.cpp
+  )
+
+## Train View Components
+set (GC_SOURCE_FILES ${GC_SOURCE_FILES}
+  src/Train/AddDeviceWizard.cpp src/Train/CalibrationData.cpp src/Train/ComputrainerController.cpp src/Train/Computrainer.cpp src/Train/DeviceConfiguration.cpp
+  src/Train/DeviceTypes.cpp src/Train/DialWindow.cpp src/Train/ErgDB.cpp src/Train/ErgDBDownloadDialog.cpp src/Train/ErgFile.cpp src/Train/ErgFilePlot.cpp
+  src/Train/Library.cpp src/Train/LibraryParser.cpp src/Train/MeterWidget.cpp src/Train/NullController.cpp src/Train/RealtimeController.cpp
+  src/Train/RealtimeData.cpp src/Train/RealtimePlot.cpp src/Train/RealtimePlotWindow.cpp src/Train/RemoteControl.cpp src/Train/SpinScanPlot.cpp
+  src/Train/SpinScanPlotWindow.cpp src/Train/SpinScanPolarPlot.cpp src/Train/GarminServiceHelper.cpp
+  )
+
+if (USE_QT5)
+  set (GC_SOURCE_FILES ${GC_SOURCE_FILES}
+    src/Train/TodaysPlanWorkoutDownload.cpp
+    )
+endif (USE_QT5)
+
+set (GC_SOURCE_FILES ${GC_SOURCE_FILES}
+  src/Train/TrainBottom.cpp src/Train/TrainDB.cpp src/Train/TrainSidebar.cpp
+  src/Train/VideoLayoutParser.cpp src/Train/VideoSyncFile.cpp src/Train/WorkoutPlotWindow.cpp src/Train/WebPageWindow.cpp
+  src/Train/WorkoutWidget.cpp src/Train/WorkoutWidgetItems.cpp src/Train/WorkoutWindow.cpp src/Train/WorkoutWizard.cpp src/Train/ZwoParser.cpp
+  )
+
+## Crash Handling
+if (MSVC)
+  set (GC_SOURCE_FILES ${GC_SOURCE_FILES}
+    src/Core/WindowsCrashHandler.cpp
+    )
+endif (MSVC)
+
 if (USE_QT5) # Qt 5
   
   #qt5_wrap_ui (GC_FORMS_HEADER_FILES ${GC_FORMS})
