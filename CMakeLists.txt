@@ -987,36 +987,39 @@ endif (USE_SAMPLERATE)
 
 if (USE_HTPATH)
 
-  #INCLUDEPATH += $$HTPATH
-  #DEPENDPATH += $$HTPATH
+  add_definitions ( -DGC_WANT_HTTP )
+
+  set (GC_OPT_INCLUDE_DIRS ${GC_OPT_INCLUDE_DIRS} "httpserver" )
+
+  set (GC_HEADER_FILES ${GC_HEADER_FILES}
+    src/Core/APIWebService.h
+    httpserver/httpglobal.h
+    httpserver/httplistener.h
+    httpserver/httpconnectionhandler.h
+    httpserver/httpconnectionhandlerpool.h
+    httpserver/httprequest.h
+    httpserver/httpresponse.h
+    httpserver/httpcookie.h
+    httpserver/httprequesthandler.h
+    httpserver/httpsession.h
+    httpserver/httpsessionstore.h
+    httpserver/staticfilecontroller.h
+    )
   
-  #DEFINES += GC_WANT_HTTP
-  
-  #HEADERS +=  Core/APIWebService.h
-  #SOURCES +=  Core/APIWebService.cpp
-  
-  #HEADERS +=  $$HTPATH/httpglobal.h \
-  #            $$HTPATH/httplistener.h \
-  #            $$HTPATH/httpconnectionhandler.h \
-  #            $$HTPATH/httpconnectionhandlerpool.h \
-  #            $$HTPATH/httprequest.h \
-  #            $$HTPATH/httpresponse.h \
-  #            $$HTPATH/httpcookie.h \
-  #            $$HTPATH/httprequesthandler.h \
-  #            $$HTPATH/httpsession.h \
-  #            $$HTPATH/httpsessionstore.h \
-  #            $$HTPATH/staticfilecontroller.h
-  #SOURCES +=  $$HTPATH/httpglobal.cpp \
-  #            $$HTPATH/httplistener.cpp \
-  #            $$HTPATH/httpconnectionhandler.cpp \
-  #            $$HTPATH/httpconnectionhandlerpool.cpp \
-  #            $$HTPATH/httprequest.cpp \
-  #            $$HTPATH/httpresponse.cpp \
-  #            $$HTPATH/httpcookie.cpp \
-  #            $$HTPATH/httprequesthandler.cpp \
-  #            $$HTPATH/httpsession.cpp \
-  #            $$HTPATH/httpsessionstore.cpp \
-  #            $$HTPATH/staticfilecontroller.cpp
+  set (GC_SOURCE_FILES ${GC_SOURCE_FILES}
+    src/Core/APIWebService.cpp
+    httpserver/httpglobal.cpp
+    httpserver/httplistener.cpp
+    httpserver/httpconnectionhandler.cpp
+    httpserver/httpconnectionhandlerpool.cpp
+    httpserver/httprequest.cpp
+    httpserver/httpresponse.cpp
+    httpserver/httpcookie.cpp
+    httpserver/httprequesthandler.cpp
+    httpserver/httpsession.cpp
+    httpserver/httpsessionstore.cpp
+    httpserver/staticfilecontroller.cpp
+    )
   
 endif (USE_HTPATH)
 
