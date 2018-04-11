@@ -896,13 +896,6 @@ if (USE_ICAL)
   #set (GC_OPT_INCLUDES ${GC_OPT_INCLUDES} ${LIBICAL_INCLUDE_DIR})
   set (GC_OPT_LIBS ${GC_OPT_LIBS} ${LIBICAL_LIBRARIES})
   
-  # we will work out the rest if you tell use where it is installed
-  #isEmpty(ICAL_INCLUDE) { ICAL_INCLUDE = $${ICAL_INSTALL}/include }
-  #isEmpty(ICAL_LIBS)    { ICAL_LIBS    = -L$${ICAL_INSTALL}/lib -lical }
-  #DEFINES     += GC_HAVE_ICAL
-  #INCLUDEPATH += $${ICAL_INCLUDE}
-  #LIBS        += $${ICAL_LIBS}
-  
   # add caldav and diary functions
 
   set (GC_HEADER_FILES ${GC_HEADER_FILES}
