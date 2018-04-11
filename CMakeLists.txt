@@ -876,7 +876,7 @@ if (USE_ICAL)
   find_package (LIBICAL)
   add_definitions ( -DGC_HAVE_ICAL)
 
-  #set (GC_OPT_INCLUDE_DIRS ${GC_OPT_INCLUDE_DIRS} ${LIBICAL_INCLUDE_DIR})
+  set (GC_OPT_INCLUDE_DIRS ${GC_OPT_INCLUDE_DIRS} ${LIBICAL_INCLUDE_DIR})
   set (GC_OPT_LIBS ${GC_OPT_LIBS} ${LIBICAL_LIBRARIES})
   
   # add caldav and diary functions

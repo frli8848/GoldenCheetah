@@ -23,7 +23,7 @@ if (WIN32)
   set(CMAKE_PREFIX_PATH "C:/LIBICAL")
 endif(WIN32)
 
-find_path (LIBICAL_INCLUDE_DIR ical.h NAMES libical/ical.h)
+find_path (LIBICAL_INCLUDE_DIR ical.h PATH_SUFFIXES libical)
 if (NOT LIBICAL_INCLUDE_DIR)
   message (STATUS "Could not find ical.h")
 endif (NOT LIBICAL_INCLUDE_DIR)
