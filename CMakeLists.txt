@@ -893,6 +893,7 @@ if (USE_ICAL)
   find_package (LIBICAL)
   add_definitions ( -DGC_HAVE_ICAL)
 
+  #set (GC_OPT_INCLUDES ${GC_OPT_INCLUDES} ${LIBICAL_INCLUDE_DIR})
   set (GC_OPT_LIBS ${GC_OPT_LIBS} ${LIBICAL_LIBRARIES})
   
   # we will work out the rest if you tell use where it is installed
@@ -920,32 +921,22 @@ endif (USE_ICAL)
 
 if (USE_LIBUSB)
 
-  #find_package (LIBUSB)
+  find_package (LIBUSB)
+  add_definitions ( -DGC_HAVE_LIBUSB )
 
-  # we will work out the rest if you tell use where it is installed
-  #isEmpty(LIBUSB_INCLUDE) { LIBUSB_INCLUDE = $${LIBUSB_INSTALL}/include }
-  #isEmpty(LIBUSB_LIBS)    {
-  # needs fixing for msvc toolchain
-  #unix  { LIBUSB_LIBS = -L$${LIBUSB_INSTALL}/lib -lusb }
-  #      win32 { LIBUSB_LIBS = -L$${LIBUSB_INSTALL}/lib/gcc -lusb }
-  #  }
-
-  #DEFINES     += GC_HAVE_LIBUSB
-  #INCLUDEPATH += $${LIBUSB_INCLUDE}
-  #LIBS        += $${LIBUSB_LIBS}
-
-  # lots of dependents
-  # SOURCES     += Train/LibUsb.cpp Train/EzUsb.c Train/Fortius.cpp Train/FortiusController.cpp \
-  #                 Train/Imagic.cpp Train/ImagicController.cpp
-  #  HEADERS     += Train/LibUsb.h Train/EzUsb.h Train/Fortius.cpp Train/FortiusController.h \
-  #                 Train/Imagic.h Train/ImagicController.h
-
-  #set (GC_HEADER_FILES ${GC_HEADER_FILES}
-  # )
+  #set (GC_OPT_INCLUDES ${GC_OPT_INCLUDES} ${LIBUSB_INCLUDE_DIR})
+  set (GC_OPT_LIBS ${GC_OPT_LIBS} ${LIBUSB_LIBRARIES})
   
-  #set (GC_SOURCE_FILES ${GC_SOURCE_FILES}
-  # )
-
+  set (GC_HEADER_FILES ${GC_HEADER_FILES}
+    src/Train/LibUsb.h src/Train/EzUsb.h src/Train/Fortius.cpp src/Train/FortiusController.h
+    src/Train/Imagic.h src/Train/ImagicController.h
+    )
+  
+  set (GC_SOURCE_FILES ${GC_SOURCE_FILES}
+    src/Train/LibUsb.cpp src/Train/EzUsb.c src/Train/Fortius.cpp src/Train/FortiusController.cpp 
+    src/Train/Imagic.cpp src/Train/ImagicController.cpp
+    )
+  
 endif (USE_LIBUSB)
 
 ###===================================================
