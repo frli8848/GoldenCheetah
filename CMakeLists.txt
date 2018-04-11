@@ -941,36 +941,31 @@ if (WIN32)
 
 endif (WIN32)
 
-
 ###=============================================================
 ### OPTIONAL => VLC [Windows and Unix. OSX uses QuickTime Video]
 ###=============================================================
 
-
 if (USE_VLC)
-
+  
   # not on a mac as they use quicktime video
   if (NOT APPLE)
-
-    # we will work out the rest if you tell use where it is installed
-    #isEmpty(VLC_INCLUDE) { VLC_INCLUDE = $${VLC_INSTALL}/include }
-    #isEmpty(VLC_LIBS)    { VLC_LIBS    = -L$${VLC_INSTALL}/lib -lvlc }
     
-    #DEFINES     += GC_HAVE_VLC
-    #INCLUDEPATH += $${VLC_INCLUDE}
-    #LIBS        += $${VLC_LIBS}
+    find_package (LIBVLC)
+    add_definitions ( -DGC_HAVE_VLC )
+    
+    set (GC_OPT_INCLUDE_DIRS ${GC_OPT_INCLUDE_DIRS} ${LIBVLC_INCLUDE_DIR})
+    set (GC_OPT_LIBS ${GC_OPT_LIBS} ${LIBVLC_LIBRARIES})
     
   endif (NOT APPLE)
-
+  
 endif (USE_VLC)
-
 
 ###=======================
 ### OPTIONAL => SAMPLERATE
 ###=======================
 
 if (USE_SAMPLERATE)
-
+  
   find_package (LIBSAMPLERATE REQUIRED)
   add_definitions ( -DGC_HAVE_SAMPLERATE )
   
@@ -1030,8 +1025,6 @@ endif (USE_HTPATH)
 ##----------------------------------------------##
 
 if (USE_CloudDB)
-
-  message (STATUS "USE_CloudDB ${QT_VERSION}" ) 
 
   if (Qt5Widgets_VERSION GREATER_EQUAL 5.5)
 
