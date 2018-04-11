@@ -17,11 +17,11 @@ string(REGEX REPLACE "^v([0-9]+)\\..*" "\\1" VERSION_MAJOR "${VERSION}")
 string(REGEX REPLACE "^v[0-9]+\\.([0-9]+).*" "\\1" VERSION_MINOR "${VERSION}")
 string(REGEX REPLACE "^v[0-9]+\\.[0-9]+\\.([0-9]+).*" "\\1" VERSION_PATCH "${VERSION}")
 string(REGEX REPLACE "^v[0-9]+\\.[0-9]+\\.[0-9]+(.*)" "\\1" VERSION_SHA1 "${VERSION}")
-set(DL_VERSION_SHORT "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}")
+set(GC_VERSION_SHORT "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}")
 
 #get_git_head_revision(GIT_REFSPEC GIT_SHA1)
 
-message(STATUS "GoldenCheetah version: ${DL_VERSION_SHORT} [${VERSION_SHA1}]")
+message(STATUS "GoldenCheetah version: ${GC_VERSION_SHORT} [${VERSION_SHA1}]")
 
 ###############################################################################
 #                                                                             #
@@ -784,34 +784,17 @@ endif (USE_R)
 
 if (USE_KQOAUTH)
   
-  if (UNIX AND NOT APPLE)
-    
-    # build from version in repo for Linux builds since
-    # kqoauth is not packaged for the Debian and this makes
-    # life much easier for the package maintainer
-    #INCLUDEPATH += $${PWD}/../kqoauth
-    #LIBS        += $${PWD}/../kqoauth/libkqoauth.a
-    #DEFINES     += GC_HAVE_KQOAUTH
-    
-  else (UNIX AND NOT APPLE)
-    
-    if (KQOAUTH_INSTALL)
-      
-      # we will work out the rest if you tell us where it is installed
-      if (NOT KQOAUTH_INCLUDE)
-	set (KQOAUTH_INCLUDE "${KQOAUTH_INSTALL}/src")
-      endif (NOT KQOAUTH_INCLUDE)
-      
-      if (NOT KQOAUTH_LIBS)
-	set (KQOAUTH_LIBS "-L$${KQOAUTH_INSTALL}/lib -lkqoauth")
-      endif (NOT KQOAUTH_LIBS)
-      
-      #INCLUDEPATH += $${KQOAUTH_INCLUDE}
-      #LIBS        += $${KQOAUTH_LIBS}
-      #DEFINES     += GC_HAVE_KQOAUTH
-      
-    endif (KQOAUTH_INSTALL)
-  endif (UNIX AND NOT APPLE)
+  find_package (KQOAUTH REQUIRED) # TODO check for version>=0.98
+  add_definitions( -DGC_HAVE_KQOAUTH )
+  
+  set (GC_OPT_INCLUDE_DIRS ${GC_OPT_INCLUDE_DIRS} ${KQOAUTH_INCLUDE_DIR})
+  set (GC_OPT_LIBS ${GC_OPT_LIBS} ${KQOAUTH_LIBRARIES})
+  
+  #set (GC_HEADER_FILES ${GC_HEADER_FILES}
+  #  )
+  
+  #set (GC_SOURCE_FILES ${GC_SOURCE_FILES}
+  #  )
 
 endif (USE_KQOAUTH)
 
@@ -893,7 +876,7 @@ if (USE_ICAL)
   find_package (LIBICAL)
   add_definitions ( -DGC_HAVE_ICAL)
 
-  #set (GC_OPT_INCLUDES ${GC_OPT_INCLUDES} ${LIBICAL_INCLUDE_DIR})
+  #set (GC_OPT_INCLUDE_DIRS ${GC_OPT_INCLUDE_DIRS} ${LIBICAL_INCLUDE_DIR})
   set (GC_OPT_LIBS ${GC_OPT_LIBS} ${LIBICAL_LIBRARIES})
   
   # add caldav and diary functions
@@ -917,7 +900,7 @@ if (USE_LIBUSB)
   find_package (LIBUSB)
   add_definitions ( -DGC_HAVE_LIBUSB )
 
-  #set (GC_OPT_INCLUDES ${GC_OPT_INCLUDES} ${LIBUSB_INCLUDE_DIR})
+  #set (GC_OPT_INCLUDE_DIRS ${GC_OPT_INCLUDE_DIRS} ${LIBUSB_INCLUDE_DIR})
   set (GC_OPT_LIBS ${GC_OPT_LIBS} ${LIBUSB_LIBRARIES})
   
   set (GC_HEADER_FILES ${GC_HEADER_FILES}
@@ -1325,7 +1308,7 @@ set (GC_HEADER_FILES ${GC_HEADER_FILES}
 
 if (USE_QT5)
   set (GC_HEADER_FILES ${GC_HEADER_FILES}
-    src/Train/TodaysPlanWorkoutDownload.h
+
     )
 endif (USE_QT5)
 
@@ -1516,6 +1499,7 @@ include_directories (
   ${GC_INCLUDE_DIRS}
   ${QWT_INCLUDE_DIR}
   ${QXT_INCLUDE_DIR}
+  ${GC_OPT_INCLUDE_DIRS}
   ${CMAKE_CURRENT_BINARY_DIR} # May be needed to find generated (ui_*.h) files (see https://anteru.net/2009/09/07/582/).
   )
 
