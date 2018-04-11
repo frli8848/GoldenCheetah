@@ -104,6 +104,14 @@ endif (LRELEASE)
 #  QMAKE_DEL_FILE = rm -f
 #}
 
+#find_program (LEX NAMES flex REQUIRED)
+#if (LEX)
+#  message (STATUS "Using lex: ${LEX}")
+#endif (LEX)
+
+find_package(FLEX REQUIRED)
+find_package(BISON REQUIRED)
+
 # If you want SRM download support you must install SRMIO
 #     http://www.zuto.de/project/srmio/
 # Set path to the root of the SRMIO installation
@@ -362,8 +370,7 @@ if (USE_QT5)
   find_package (Qt5Network REQUIRED)
   find_package (Qt5Svg REQUIRED)
   find_package (Qt5Concurrent REQUIRED)
-  #find_package (Qt5SerialPort REQUIRED)
-  find_package(Qt5Core COMPONENTS Qt5SerialPort REQUIRED)
+  find_package(Qt5SerialPort REQUIRED)
   find_package (Qt5MultimediaWidgets REQUIRED)
   #find_package (Qt5PrintSupport REQUIRED)
 
@@ -412,10 +419,10 @@ set (GC_INCLUDE_DIRS
   src/FileIO
   src/Cloud
   src/Charts
-  src/Metric
+  src/Metrics
   src/Gui
   src/Core
-  src/Planing
+  src/Planning
   )
 
 ###=======================================================================
@@ -469,7 +476,11 @@ add_definitions( -DQXT_STATIC )
 # if they're not part of the QT include
 #INCLUDEPATH += $${LIBZ_INCLUDE}
 #LIBS += $${LIBZ_LIBS}
-#find_package (ZLIB)
+
+find_package (ZLIB REQUIRED)
+
+set (GC_INCLUDE_DIRS ${GC_INCLUDE_DIRS} ${ZLIB_INCLUDE_DIRS})
+
 
 ###===============================
 ### PLATFORM SPECIFIC DEPENDENCIES
@@ -1085,7 +1096,7 @@ if (Qt5Widgets_VERSION GREATER_EQUAL 5)
   #SOURCES += Train/KettlerRacer.cpp Train/KettlerRacerController.cpp Train/KettlerRacerConnection.cpp
   #HEADERS += Train/KettlerRacer.h Train/KettlerRacerController.h Train/KettlerRacerConnection.h
   
-  # bluetooth in QT5.5 or higher(5.4 was only a tech preview)
+  # bluetooth in QT5.5 or higher (5.4 was only a tech preview)
   if (Qt5Widgets_VERSION GREATER_EQUAL 5.5) 
     #greaterThan(QT_MINOR_VERSION, 4) {
     #QT += bluetooth
@@ -1108,19 +1119,57 @@ if (Qt5Widgets_VERSION GREATER_EQUAL 5)
   
 endif(Qt5Widgets_VERSION GREATER_EQUAL 5) 
 
-
 ###=====================
 ### LEX AND YACC SOURCES
 ###=====================
 
-#YACCSOURCES += Core/DataFilter.y \
-#               FileIO/JsonRideFile.y \
-#               Core/RideDB.y
+# qmake appends _yacc and _lex to genereted files so we need to do that too.
+# We also need to add some flags to bison_target to make cmake generate the same output as qmake.
 
-#LEXSOURCES  += Core/DataFilter.l \
-#               FileIO/JsonRideFile.l \
-#               Core/RideDB.l
+bison_target (DataFilter_y src/Core/DataFilter.y
+  ${CMAKE_CURRENT_BINARY_DIR}/DataFilter_yacc.cpp
+  DEFINES_FILE ${CMAKE_CURRENT_BINARY_DIR}/DataFilter_yacc.h
+  COMPILE_FLAGS "-p DataFilter -b DataFilter -d"
+  )
+flex_target (DataFilter_l src/Core/DataFilter.l ${CMAKE_CURRENT_BINARY_DIR}/DataFilter_lex.cpp)
+add_flex_bison_dependency (DataFilter_l DataFilter_y)
+set (GC_HEADER_FILES ${GC_HEADER_FILES}
+  ${BISON_DataFilter_y_OUTPUTS}
+  ${FLEX_DataFilter_l_OUTPUTS}
+  )
+set_property(SOURCE DataFilter_yacc.h PROPERTY SKIP_AUTOGEN ON)
+set_property(SOURCE DataFilter_yacc.cpp PROPERTY SKIP_AUTOGEN ON)
+set_property(SOURCE DataFilter_lex.cpp PROPERTY SKIP_AUTOGEN ON)
 
+bison_target (JsonRideFile_y src/FileIO/JsonRideFile.y
+  ${CMAKE_CURRENT_BINARY_DIR}/JsonRideFile_yacc.cpp
+  DEFINES_FILE ${CMAKE_CURRENT_BINARY_DIR}/JsonRideFile_yacc.h
+  COMPILE_FLAGS "-p JsonRideFile -b JsonRideFile -d"
+  )
+flex_target (JsonRideFile_l src/FileIO/JsonRideFile.l ${CMAKE_CURRENT_BINARY_DIR}/JsonRideFile_lex.cpp)
+add_flex_bison_dependency (JsonRideFile_l JsonRideFile_y)
+set (GC_HEADER_FILES ${GC_HEADER_FILES}
+  ${BISON_JsonRideFile_y_OUTPUTS}
+  ${FLEX_JsonRideFile_l_OUTPUTS}
+  )
+set_property(SOURCE JsonRideFile_yacc.h PROPERTY SKIP_AUTOGEN ON)
+set_property(SOURCE JsonRideFile_yacc.cpp PROPERTY SKIP_AUTOGEN ON)
+set_property(SOURCE JsonRideFile_lex.cpp PROPERTY SKIP_AUTOGEN ON)
+
+bison_target (RideDB_y src/Core/RideDB.y
+  ${CMAKE_CURRENT_BINARY_DIR}/RideDB_yacc.cpp
+  DEFINES_FILE ${CMAKE_CURRENT_BINARY_DIR}/RideDB_yacc.h
+  COMPILE_FLAGS "-p RideDB -b RideDB -d"
+  )
+flex_target (RideDB_l src/Core/RideDB.l ${CMAKE_CURRENT_BINARY_DIR}/RideDB_lex.cpp)
+add_flex_bison_dependency (RideDB_l RideDB_y)
+set (GC_HEADER_FILES ${GC_HEADER_FILES}
+  ${BISON_RideDB_y_OUTPUTS}
+  ${FLEX_RideDB_l_OUTPUTS}
+  )
+set_property(SOURCE RideDB_yacc.h PROPERTY SKIP_AUTOGEN ON)
+set_property(SOURCE RideDB_yacc.cpp PROPERTY SKIP_AUTOGEN ON)
+set_property(SOURCE RideDB_lex.cpp PROPERTY SKIP_AUTOGEN ON)
 
 ###=========================================
 ### HEADER FILES [scanned by qmake, for moc]
@@ -1398,6 +1447,10 @@ include_directories (
     ${Qt5Widgets_INCLUDE_DIRS}
     ${Qt5Gui_INCLUDE_DIRS}
     ${Qt5Core_INCLUDE_DIRS}
+    ${Qt5Xml_INCLUDE_DIRS}
+    ${Qt5Sql_INCLUDE_DIRS}
+    ${Qt5SerialPort_INCLUDE_DIRS}
+    ${Qt5WebKitWidgets_INCLUDE_DIRS} # TODO make optional.
     ${Qt5PrintSupport_INCLUDE_DIRS}
   endif (USE_QT5)
 
@@ -1409,8 +1462,13 @@ include_directories (
 
 if (USE_QT5)
   set (GC_QT_LIBS "Qt5::Widgets")
+  set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::Core")
+  set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::Xml")
+  set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::Sql") 
+  set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::Network")
+  set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::Svg")
   set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::Concurrent")
-  #set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::SerialPort")
+  set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::SerialPort")
   set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::Multimedia")
   set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::MultimediaWidgets")
   #set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::PrintSupport")
@@ -1428,6 +1486,7 @@ add_executable(GoldenCheetah
 # Deps.
 target_link_libraries (GoldenCheetah
   ${GC_QT_LIBS}
+  ${ZLIB_LIBRARIES}
   #${QWT_LIBRARIES}
   )
 
