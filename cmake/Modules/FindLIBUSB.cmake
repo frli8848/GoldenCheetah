@@ -9,7 +9,7 @@ if (WIN32)
   set(CMAKE_PREFIX_PATH "C:/LIBUSB")
 endif(WIN32)
 
-find_path (LIBUSB_INCLUDE_DIR libusb.h NAMES libusb-1.0/libusb.h)
+find_path (LIBUSB_INCLUDE_DIR libusb.h PATH_SUFFIXES libusb-1.0)
 if (NOT LIBUSB_INCLUDE_DIR)
   message (STATUS "Could not find libusb.h")
 endif (NOT LIBUSB_INCLUDE_DIR)
