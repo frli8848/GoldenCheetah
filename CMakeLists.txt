@@ -1032,23 +1032,30 @@ endif (USE_HTPATH)
 ##----------------------------------------------##
 
 if (USE_CloudDB)
-  
+
+  message (STATUS "USE_CloudDB ${QT_VERSION}" ) 
+
   if (Qt5Widgets_VERSION GREATER_EQUAL 5.5)
+
+    add_definitions ( -DGC_HAS_CLOUD_DB )
     
-    #HEADERS += Cloud/CloudDBChart.h Cloud/CloudDBCommon.h \
-    #           Cloud/CloudDBCurator.h Cloud/CloudDBStatus.h \
-    #           Cloud/CloudDBVersion.h Cloud/CloudDBTelemetry.h
-    #SOURCES += Cloud/CloudDBChart.cpp Cloud/CloudDBCommon.cpp \
-    #           Cloud/CloudDBCurator.cpp Cloud/CloudDBStatus.cpp \
-    #           Cloud/CloudDBVersion.cpp Cloud/CloudDBTelemetry.cpp
+    set (GC_HEADER_FILES ${GC_HEADER_FILES}
+      src/Cloud/CloudDBChart.h src/Cloud/CloudDBCommon.h
+      src/Cloud/CloudDBCurator.h src/Cloud/CloudDBStatus.h
+      src/Cloud/CloudDBVersion.h src/Cloud/CloudDBTelemetry.h
+      )
     
-    #DEFINES += GC_HAS_CLOUD_DB
+    set (GC_SOURCE_FILES ${GC_SOURCE_FILES}
+      src/Cloud/CloudDBChart.cpp src/Cloud/CloudDBCommon.cpp
+      src/Cloud/CloudDBCurator.cpp src/Cloud/CloudDBStatus.cpp
+      src/Cloud/CloudDBVersion.cpp src/Cloud/CloudDBTelemetry.cpp      
+      )
     
   else (Qt5Widgets_VERSION GREATER_EQUAL 5.5)
     
     # QT5 but not 5.5 or higher
     message(STATUS "INFO: CloudDB requires version QT >= 5.5, no support for ${QT_VERSION}")
-
+    
   endif (Qt5Widgets_VERSION GREATER_EQUAL 5.5)
   
 endif (USE_CloudDB)
