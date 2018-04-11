@@ -370,7 +370,7 @@ if (USE_QT5)
   find_package (Qt5Network REQUIRED)
   find_package (Qt5Svg REQUIRED)
   find_package (Qt5Concurrent REQUIRED)
-  find_package(Qt5SerialPort REQUIRED)
+  find_package (Qt5SerialPort REQUIRED)
   find_package (Qt5MultimediaWidgets REQUIRED)
   find_package (Qt5PrintSupport REQUIRED)
 
@@ -380,17 +380,17 @@ if (USE_QT5)
   ## If building with QT5 there is experimental suport for building
   ## with WebEngine now that WebKit is deprecated in QT 5.6
   ## It brings in a LOT of dependencies !
-  if (NOWEBKIT AND NOT ${Qt5Widgets_VERSION} LESS 5.6) # We require Qt >= 5.8 so we could skip the 2nd test here.
-    #CONFIG += c++11
+  if (NOWEBKIT AND Qt5Widgets_VERSION GREATER_EQUAL 5.6) # We require Qt >= 5.8 so we could skip the 2nd test here (?).
+    set (CMAKE_CXX_STANDARD 11)
     find_package (Qt5WebEngine REQUIRED)
     find_package (Qt5WebEngineCore REQUIRED)
     find_package (Qt5WebEngineWidgets REQUIRED)
     find_package (Qt5WebChannel REQUIRED)
     find_package (Qt5Positioning REQUIRED)
-  else (NOWEBKIT AND NOT ${Qt5Widgets_VERSION} LESS 5.6)
+  else (NOWEBKIT AND Qt5Widgets_VERSION GREATER_EQUAL 5.6)
     # On 5.5 or earlier we can still use WebKit
     find_package (Qt5WebKitWidgets)
-  endif (NOWEBKIT AND NOT ${Qt5Widgets_VERSION} LESS 5.6)
+  endif (NOWEBKIT AND Qt5Widgets_VERSION GREATER_EQUAL 5.6)
   
   if (APPLE)
     ## need mac extras and clang++ needs to know which stdlib to link with
@@ -650,7 +650,7 @@ qt5_add_translation (GC_GM_FILES ${GC_TS_FILES})
 ### OPTIONAL => LMFIT Model fitting library
 ###========================================
 
-if (NOT LMFIT_INSTALL)
+if (USE_LMFIT)
 
   #find_package (LMFIT)
   
@@ -662,7 +662,7 @@ if (NOT LMFIT_INSTALL)
   #LIBS        += $${LMFIT_LIBS}
   #DEFINES     += GC_HAVE_LMFIT
 
-endif (NOT LMFIT_INSTALL)
+endif (USE_LMFIT)
 
 ###=========================
 ### OPTIONAL => Embed Python
@@ -890,20 +890,27 @@ endif (USE_KML)
 
 if (USE_ICAL)
 
-  #find_package (ICAL)
-  #find_package (LIBICAL)
+  find_package (LIBICAL)
+  add_definitions ( -DGC_HAVE_ICAL)
+
+  set (GC_OPT_LIBS ${GC_OPT_LIBS} ${LIBICAL_LIBRARIES})
   
   # we will work out the rest if you tell use where it is installed
   #isEmpty(ICAL_INCLUDE) { ICAL_INCLUDE = $${ICAL_INSTALL}/include }
   #isEmpty(ICAL_LIBS)    { ICAL_LIBS    = -L$${ICAL_INSTALL}/lib -lical }
-  
   #DEFINES     += GC_HAVE_ICAL
   #INCLUDEPATH += $${ICAL_INCLUDE}
   #LIBS        += $${ICAL_LIBS}
   
   # add caldav and diary functions
-  #HEADERS     += Core/ICalendar.h Charts/DiaryWindow.h Cloud/CalDAV.h
-  #SOURCES     += Core/ICalendar.cpp Charts/DiaryWindow.cpp Cloud/CalDAV.cpp
+
+  set (GC_HEADER_FILES ${GC_HEADER_FILES}
+    src/Core/ICalendar.h src/Charts/DiaryWindow.h src/Cloud/CalDAV.h
+    )
+  
+  set (GC_SOURCE_FILES ${GC_SOURCE_FILES}
+    src/Core/ICalendar.cpp src/Charts/DiaryWindow.cpp src/Cloud/CalDAV.cpp
+    )
   
 endif (USE_ICAL)
 
@@ -933,8 +940,13 @@ if (USE_LIBUSB)
   #  HEADERS     += Train/LibUsb.h Train/EzUsb.h Train/Fortius.cpp Train/FortiusController.h \
   #                 Train/Imagic.h Train/ImagicController.h
 
-endif (USE_LIBUSB)
+  #set (GC_HEADER_FILES ${GC_HEADER_FILES}
+  # )
+  
+  #set (GC_SOURCE_FILES ${GC_SOURCE_FILES}
+  # )
 
+endif (USE_LIBUSB)
 
 ###===================================================
 ### OPTIONAL => USBXPRESS [Windows only for ANT+ USB1]
@@ -1502,7 +1514,15 @@ include_directories (
     ${Qt5Xml_INCLUDE_DIRS}
     ${Qt5Sql_INCLUDE_DIRS}
     ${Qt5SerialPort_INCLUDE_DIRS}
-    ${Qt5WebKitWidgets_INCLUDE_DIRS} # TODO make optional.
+    if (NOT NOWEBKIT)
+      ${Qt5WebKitWidgets_INCLUDE_DIRS} # TODO make optional.
+    else (NOT NOWEBKIT)
+      ${Qt5WebEngine_INCLUDE_DIRS}
+      ${Qt5WebEngineCore_INCLUDE_DIRS}
+      ${Qt5WebEngineWidgets_INCLUDE_DIRS}
+      ${Qt5WebChannel_INCLUDE_DIRS}
+      ${Qt5Positioning_INCLUDE_DIRS}      
+    endif (NOT NOWEBKIT)
     ${Qt5Bluetooth_INCLUDE_DIRS}     # TODO make optional.
     ${Qt5Charts_INCLUDE_DIRS}	     # TODO make optional.
     ${Qt5OpenGL_INCLUDE_DIRS}	     # TODO make optional.
@@ -1527,7 +1547,15 @@ if (USE_QT5)
   set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::SerialPort")
   set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::Multimedia")
   set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::MultimediaWidgets")
-  set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::WebKitWidgets") # TODO make optional.
+  if (NOT NOWEBKIT)
+    set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::WebKitWidgets") # TODO make optional.
+  else (NOT NOWEBKIT)
+    set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::WebEngine")
+    set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::WebEngineCore")
+    set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::WebEngineWidgets")
+    set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::WebChannel")
+    set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::Positioning")
+  endif (NOT NOWEBKIT)
   set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::Bluetooth") # TODO make optional.
   set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::Charts") # TODO make optional.
   set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::OpenGL") # TODO make optional.
@@ -1550,6 +1578,7 @@ add_executable(GoldenCheetah
 target_link_libraries (GoldenCheetah
   ${GC_QT_LIBS}
   ${ZLIB_LIBRARIES}		# TODO add this only when needed.
+  ${GC_OPT_LIBS}
   #${QWT_LIBRARIES}
   )
 
