@@ -971,13 +971,11 @@ endif (USE_VLC)
 
 if (USE_SAMPLERATE)
 
-  # we will work out the rest if you tell use where it is installed
-  #isEmpty(SAMPLERATE_INCLUDE) { SAMPLERATE_INCLUDE = $${SAMPLERATE_INSTALL}/include }
-  #isEmpty(SAMPLERATE_LIBS)    { SAMPLERATE_LIBS    = -L$${SAMPLERATE_INSTALL}/lib -lsamplerate }
+  find_package (LIBSAMPLERATE REQUIRED)
+  add_definitions ( -DGC_HAVE_SAMPLERATE )
   
-  #DEFINES     += GC_HAVE_SAMPLERATE
-  #INCLUDEPATH += $${SAMPLERATE_INCLUDE}
-  #LIBS        += $${SAMPLERATE_LIBS}
+  set (GC_OPT_INCLUDE_DIRS ${GC_OPT_INCLUDE_DIRS} ${LIBSAMPLERATE_INCLUDE_DIR})
+  set (GC_OPT_LIBS ${GC_OPT_LIBS} ${LIBSAMPLERATE_LIBRARIES})
   
 endif (USE_SAMPLERATE)
 
