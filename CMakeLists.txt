@@ -372,7 +372,7 @@ if (USE_QT5)
   find_package (Qt5Concurrent REQUIRED)
   find_package(Qt5SerialPort REQUIRED)
   find_package (Qt5MultimediaWidgets REQUIRED)
-  #find_package (Qt5PrintSupport REQUIRED)
+  find_package (Qt5PrintSupport REQUIRED)
 
   ## Always add debug information for Windows, MSVC
   #win32-msvc* { CONFIG += force_debug_info }
@@ -400,7 +400,9 @@ if (USE_QT5)
   endif (APPLE)
   
   set(CMAKE_AUTOMOC ON)
-  set(CMAKE_AUTOUIC ON)
+  #set(CMAKE_AUTOUIC ON)
+  set(CMAKE_AUTORCC ON)
+
   message (STATUS "Qt version: ${Qt5Widgets_VERSION}")
 
   #add_definitions( -DUSE_QT5 ) 
@@ -441,11 +443,11 @@ set (GC_INCLUDE_DIRS  ${GC_INCLUDE_DIRS} "qtsolutions/qwtcurve")
 # GC has its own Qwt
 #find_package (QWT REQUIRED)
 
-# We could 1) write a CMakeFile.txt for building Qwt or 2) just add the sources to GC
+# We could 1) write a CMakeFile.txt for building the local (static) Qwt or 2) just add the sources to GC
 #
 # 1)
 #add_subdirectory("qwt/src")
-#_
+#
 # 2) Add Qwt sources
 file (GLOB_RECURSE QWT_HEADER_FILES RELATIVE ${CMAKE_SOURCE_DIR} qwt/src/*.h)
 file (GLOB_RECURSE QWT_SOURCE_FILES RELATIVE ${CMAKE_SOURCE_DIR} qwt/src/*.cpp)
@@ -468,8 +470,10 @@ endif (WIN32)
 # Qxt
 #
 
-file (GLOB_RECURSE QXT_HEADER_FILES RELATIVE ${CMAKE_SOURCE_DIR} qxt/src/*.h)
-file (GLOB_RECURSE QXT_SOURCE_FILES RELATIVE ${CMAKE_SOURCE_DIR} qxt/src/*.cpp)
+# Only some of (the now unmaintained?) Qxt files is used by GC, see "Contributed solutions" further down.
+# Hence, do not include all Qxt sources (which don't build with Qt 5?)
+#file (GLOB_RECURSE QXT_HEADER_FILES RELATIVE ${CMAKE_SOURCE_DIR} qxt/src/*.h)
+#file (GLOB_RECURSE QXT_SOURCE_FILES RELATIVE ${CMAKE_SOURCE_DIR} qxt/src/*.cpp)
 add_definitions( -DQXT_STATIC )
 
 # Compress and math libs must be defined in gcconfig.pri
@@ -477,10 +481,9 @@ add_definitions( -DQXT_STATIC )
 #INCLUDEPATH += $${LIBZ_INCLUDE}
 #LIBS += $${LIBZ_LIBS}
 
-find_package (ZLIB REQUIRED)
+find_package (ZLIB REQUIRED)	# TODO do this only when needed.
 
 set (GC_INCLUDE_DIRS ${GC_INCLUDE_DIRS} ${ZLIB_INCLUDE_DIRS})
-
 
 ###===============================
 ### PLATFORM SPECIFIC DEPENDENCIES
@@ -554,12 +557,17 @@ if (APPLE)
 else (APPLE)
   
   # not on mac we need our own full screen support and segment control button
-  #HEADERS += Gui/QTFullScreen.h
-  #SOURCES += Gui/QTFullScreen.cpp
   
-  #HEADERS += Train/VideoWindow.h
-  #SOURCES += Train/VideoWindow.cpp
-
+  set (GC_HEADER_FILES ${GC_HEADER_FILES}
+    src/Gui/QTFullScreen.h
+    src/Train/VideoWindow.h
+    )
+  
+  set (GC_SOURCE_FILES ${GC_SOURCE_FILES}
+    src/Gui/QTFullScreen.cpp
+    src/Train/VideoWindow.cpp    
+    )
+  
 endif (APPLE)
 
 #### these are no longer non-mac only
@@ -575,53 +583,61 @@ set (GC_SOURCE_FILES ${GC_SOURCE_FILES}
 ### LANGUAGE SUPPORT
 ###=================
 
-set (TRANSLATIONS
-  Resources/translations/gc_fr.ts
-  Resources/translations/gc_ja.ts
-  Resources/translations/gc_it.ts
-  Resources/translations/gc_pt-br.ts
-  Resources/translations/gc_de.ts
-  Resources/translations/gc_cs.ts
-  Resources/translations/gc_es.ts
-  Resources/translations/gc_pt.ts
-  Resources/translations/gc_ru.ts
-  Resources/translations/gc_zh-cn.ts
-  Resources/translations/gc_zh-tw.ts
-  Resources/translations/gc_nl.ts
-  Resources/translations/gc_sv.ts
+find_package (Qt5LinguistTools REQUIRED)
+
+set (GC_TS_FILES
+  src/Resources/translations/gc_fr.ts
+  src/Resources/translations/gc_ja.ts
+  src/Resources/translations/gc_it.ts
+  src/Resources/translations/gc_pt-br.ts
+  src/Resources/translations/gc_de.ts
+  src/Resources/translations/gc_cs.ts
+  src/Resources/translations/gc_es.ts
+  src/Resources/translations/gc_pt.ts
+  src/Resources/translations/gc_ru.ts
+  src/Resources/translations/gc_zh-cn.ts
+  src/Resources/translations/gc_zh-tw.ts
+  src/Resources/translations/gc_nl.ts
+  src/Resources/translations/gc_sv.ts
   )
 
+qt5_add_translation (GC_GM_FILES ${GC_TS_FILES})
+
+#message (STATUS "${GC_GM_FILES}")
+
 # Need lrelease to generate qm files
-if (NOT LRELEASE)
-  
-  if (WIN32)
-    set (LRELEASE = ${QT_INSTALL_BINS}\\lrelease.exe)
-  endif (WIN32)
-  
-  if (UNIX AND NOT APPLE)
-    set (LRELEASE  ${QT_INSTALL_BINS}/lrelease-qt4)
-  else (UNIX AND NOT APPLE)
-    set (LRELEASE  ${QT_INSTALL_BINS}/lrelease)
-  endif (UNIX AND NOT APPLE)
-  
-endif (NOT LRELEASE)
+#if (NOT LRELEASE)
+#  
+#  if (WIN32)
+#    set (LRELEASE = ${QT_INSTALL_BINS}\\lrelease.exe)
+#  endif (WIN32)
+#  
+#  if (UNIX AND NOT APPLE)
+#    set (LRELEASE  ${QT_INSTALL_BINS}/lrelease-qt4)
+#  else (UNIX AND NOT APPLE)
+#    set (LRELEASE  ${QT_INSTALL_BINS}/lrelease)
+#  endif (UNIX AND NOT APPLE)
+#  
+#endif (NOT LRELEASE)
 
 # How to run lrelease
-if  (NOT TS_DIR)
-  set (TS_DIR "${PWD}/Resources/translations")
-  set (TSQM.name "lrelease ${QMAKE_FILE_IN}")
-  set (TSQM.input ${TRANSLATIONS})
-  set (TSQM.output ${TS_DIR}/${QMAKE_FILE_BASE}.qm)
-  set (TSQM.commands  "${QMAKE_LRELEASE} ${QMAKE_FILE_IN} -qm ${TS_DIR}/${QMAKE_FILE_BASE}.qm")
-  set (TSQM.CONFIG  no_link target_predeps)
-  set (QMAKE_EXTRA_COMPILERS ${QMAKE_EXTRA_COMPILERS} TSQM)
-endif  (NOT TS_DIR)
+#if  (NOT TS_DIR)
+#  set (TS_DIR "${PWD}/Resources/translations")
+#  set (TSQM.name "lrelease ${QMAKE_FILE_IN}")
+#  set (TSQM.input ${TRANSLATIONS})
+#  set (TSQM.output ${TS_DIR}/${QMAKE_FILE_BASE}.qm)
+#  set (TSQM.commands  "${QMAKE_LRELEASE} ${QMAKE_FILE_IN} -qm ${TS_DIR}/${QMAKE_FILE_BASE}.qm")
+#  set (TSQM.CONFIG  no_link target_predeps)
+#  set (QMAKE_EXTRA_COMPILERS ${QMAKE_EXTRA_COMPILERS} TSQM)
+#endif  (NOT TS_DIR)
 
 ###==========
 ### RESOURCES
 ###==========
 
-set (RESOURCES src/Resources/application.qrc src/Resources/RideWindow.qrc)
+#set (GC_RESOURCES
+#  src/Resources/application.qrc src/Resources/RideWindow.qrc
+#  )
 
 ###############################################################################
 #                                                                             #
@@ -756,6 +772,7 @@ if (USE_R)
     
     ## For hardware accelerated scene rendering
     #QT += opengl
+    find_package(Qt5OpenGL)
 
   endif (R_HOME)
   
@@ -1065,55 +1082,88 @@ endif (USE_CloudDB)
 ### FEATURES ENABLED WHEN HAVE QT5 [or higher]
 ###===========================================
 
-set (GC_HEADER_FILES)
-
 if (Qt5Widgets_VERSION GREATER_EQUAL 5) 
-
+  
   # Features that only work with QT5 or higher
-  #SOURCES += Cloud/Dropbox.cpp
-  #HEADERS += Cloud/Dropbox.h
-  #SOURCES += Cloud/GoogleDrive.cpp Cloud/KentUniversity.cpp
-  #HEADERS += Cloud/GoogleDrive.h Cloud/KentUniversity.h
-  #SOURCES += Cloud/OpenData.cpp
-  #HEADERS += Cloud/OpenData.h
+  
+  set (GC_HEADER_FILES ${GC_HEADER_FILES}
+    src/Cloud/Dropbox.h
+    src/Cloud/GoogleDrive.h src/Cloud/KentUniversity.h
+    src/Cloud/OpenData.h
+    )
+  
+  set (GC_SOURCE_FILES ${GC_SOURCE_FILES}
+    src/Cloud/Dropbox.cpp
+    src/Cloud/GoogleDrive.cpp src/Cloud/KentUniversity.cpp
+    src/Cloud/OpenData.cpp
+    )
 
   if (Qt5Widgets_VERSION GREATER_EQUAL 5.4) 
     
-    #SOURCES += Cloud/SixCycle.cpp
-    #HEADERS += Cloud/SixCycle.h
-    #SOURCES += Cloud/PolarFlow.cpp
-    #HEADERS += Cloud/PolarFlow.h
-    #SOURCES += Cloud/SportTracks.cpp
-    #HEADERS += Cloud/SportTracks.h
-    #SOURCES += Cloud/TodaysPlan.cpp
-    #HEADERS += Cloud/TodaysPlan.h
+    set (GC_HEADER_FILES ${GC_HEADER_FILES}
+      src/Cloud/SixCycle.h
+      src/Cloud/PolarFlow.h
+      src/Cloud/SportTracks.h
+      src/Cloud/TodaysPlan.h
+      )
+    
+    set (GC_SOURCE_FILES ${GC_SOURCE_FILES}
+      src/Cloud/SixCycle.cpp
+      src/Cloud/PolarFlow.cpp
+      src/Cloud/SportTracks.cpp
+      src/Cloud/TodaysPlan.cpp
+      )
+    
   endif (Qt5Widgets_VERSION GREATER_EQUAL 5.4) 
 
-  #SOURCES += Train/MonarkController.cpp Train/MonarkConnection.cpp
-  #HEADERS += Train/MonarkController.h Train/MonarkConnection.h
-  #SOURCES += Train/Kettler.cpp Train/KettlerController.cpp Train/KettlerConnection.cpp
-  #HEADERS += Train/Kettler.h Train/KettlerController.h Train/KettlerConnection.h
-  #SOURCES += Train/KettlerRacer.cpp Train/KettlerRacerController.cpp Train/KettlerRacerConnection.cpp
-  #HEADERS += Train/KettlerRacer.h Train/KettlerRacerController.h Train/KettlerRacerConnection.h
+  set (GC_HEADER_FILES ${GC_HEADER_FILES}
+    src/Train/MonarkController.h src/Train/MonarkConnection.h
+    src/Train/Kettler.h src/Train/KettlerController.h src/Train/KettlerConnection.h  
+    src/Train/KettlerRacer.h src/Train/KettlerRacerController.h src/Train/KettlerRacerConnection.h
+    )
+
+  set (GC_SOURCE_FILES ${GC_SOURCE_FILES}
+    src/Train/MonarkController.cpp src/Train/MonarkConnection.cpp
+    src/Train/Kettler.cpp src/Train/KettlerController.cpp src/Train/KettlerConnection.cpp
+    src/Train/KettlerRacer.cpp src/Train/KettlerRacerController.cpp src/Train/KettlerRacerConnection.cpp
+    )
   
   # bluetooth in QT5.5 or higher (5.4 was only a tech preview)
   if (Qt5Widgets_VERSION GREATER_EQUAL 5.5) 
+
     #greaterThan(QT_MINOR_VERSION, 4) {
     #QT += bluetooth
-    #HEADERS += Train/BT40Controller.h Train/BT40Device.h
-    #SOURCES += Train/BT40Controller.cpp Train/BT40Device.cpp
+    find_package (Qt5Bluetooth REQUIRED)
+
+    set (GC_HEADER_FILES ${GC_HEADER_FILES}
+      src/Train/BT40Controller.h src/Train/BT40Device.h
+      )
+
+    set (GC_SOURCE_FILES ${GC_SOURCE_FILES}
+      src/Train/BT40Controller.cpp src/Train/BT40Device.cpp
+      )
+    
   endif (Qt5Widgets_VERSION GREATER_EQUAL 5.5) 
   
-    # qt charts is officially supported from QT5.8 or higher
-    # in 5.7 it is a tech preview and not always available
-    if (Qt5Widgets_VERSION GREATER_EQUAL 5.8) 
-    #greaterThan(QT_MINOR_VERSION, 7) {
-    #QT += charts opengl
-    
+  # qt charts is officially supported from QT5.8 or higher
+  # in 5.7 it is a tech preview and not always available
+  
+  if (Qt5Widgets_VERSION GREATER_EQUAL 5.8) 
+
     # Dashboard uses qt charts, so needs at least Qt 5.7
-    #DEFINES += GC_HAVE_OVERVIEW
-    #HEADERS += Charts/OverviewWindow.h
-    #SOURCES += Charts/OverviewWindow.cpp
+    
+    find_package(Qt5Charts REQUIRED)
+    find_package(Qt5OpenGL REQUIRED)
+    
+    #add_definitions( -DGC_HAVE_OVERVIEW )
+    
+    #set (GC_HEADER_FILES ${GC_HEADER_FILES}
+    #  src/Charts/OverviewWindow.h
+    #  )
+    
+    #set (GC_SOURCE_FILES ${GC_SOURCE_FILES}
+    #  src/Charts/OverviewWindow.cpp
+    #  )	  
     
   endif (Qt5Widgets_VERSION GREATER_EQUAL 5.8) 
   
@@ -1177,7 +1227,8 @@ set_property(SOURCE RideDB_lex.cpp PROPERTY SKIP_AUTOGEN ON)
 
 # ANT+
 set (GC_HEADER_FILES ${GC_HEADER_FILES}
-  src/ANT/ANTChannel.h src/ANT/ANT.h src/ANT/ANTlocalController.h src/ANT/ANTLogger.h src/ANT/ANTMessage.h src/ANT/ANTMessages.h)
+  src/ANT/ANTChannel.h src/ANT/ANT.h src/ANT/ANTlocalController.h src/ANT/ANTLogger.h src/ANT/ANTMessage.h src/ANT/ANTMessages.h
+  )
 
 # Charts and associated widgets
 set (GC_HEADER_FILES ${GC_HEADER_FILES}
@@ -1195,11 +1246,11 @@ set (GC_HEADER_FILES ${GC_HEADER_FILES}
   )
 
 # RideWindow temporarily disabled if we don't have WebKit
-if (NOWEBKIT)
+if (NOT NOWEBKIT)
   set (GC_HEADER_FILES ${GC_HEADER_FILES}
     src/Charts/RideWindow.h
     )
-endif (NOWEBKIT)
+endif (NOT NOWEBKIT)
 
 # cloud services
 set (GC_HEADER_FILES ${GC_HEADER_FILES}
@@ -1288,7 +1339,6 @@ set (GC_HEADER_FILES ${GC_HEADER_FILES}
   src/Train/WorkoutWidget.h src/Train/WorkoutWidgetItems.h src/Train/WorkoutWindow.h src/Train/WorkoutWizard.h src/Train/ZwoParser.h
   )
 
-
 ###=============
 ### SOURCE FILES
 ###=============
@@ -1314,11 +1364,11 @@ set (GC_SOURCE_FILES ${GC_SOURCE_FILES}
   )
 
 # RideWindow temporarily disabled if we don't have WebKit
-if (NOWEBKIT)
+if (NOT NOWEBKIT)
   set (GC_SOURCE_FILES ${GC_SOURCE_FILES}
     src/Charts/RideWindow.cpp
     )
-endif (NOWEBKIT)
+endif (NOT NOWEBKIT)
     
 ## Cloud Services / Web resources
 set (GC_SOURCE_FILES ${GC_SOURCE_FILES}
@@ -1429,8 +1479,9 @@ if (USE_QT5) # Qt 5
   #qt5_wrap_cpp (GC_HEADER_FILES_MOC ${GC_HEADER_FILES})
   #set (GC_FORMS_HEADER_FILES ${GC_FORMS}) # We use AUTOMUIC ON
   set (GC_HEADER_FILES_MOC ${GC_HEADER_FILES}) # We use AUTOMOC ON
+  set (GC_RCC_FILES ${GC_RESOURCES})	       # We use AUTORCC ON
   set (QWT_HEADER_FILES_MOC ${QWT_HEADER_FILES}) # We use AUTOMOC ON
-  set (QXT_HEADER_FILES_MOC ${QXT_HEADER_FILES}) # We use AUTOMOC ON
+  #set (QXT_HEADER_FILES_MOC ${QXT_HEADER_FILES}) # We use AUTOMOC ON
 
 else (USE_QT5) # Qt 4
 
@@ -1447,22 +1498,27 @@ include_directories (
     ${Qt5Widgets_INCLUDE_DIRS}
     ${Qt5Gui_INCLUDE_DIRS}
     ${Qt5Core_INCLUDE_DIRS}
+    #${Qt5LinguistTools_INCLUDE_DIRS}
     ${Qt5Xml_INCLUDE_DIRS}
     ${Qt5Sql_INCLUDE_DIRS}
     ${Qt5SerialPort_INCLUDE_DIRS}
     ${Qt5WebKitWidgets_INCLUDE_DIRS} # TODO make optional.
+    ${Qt5Bluetooth_INCLUDE_DIRS}     # TODO make optional.
+    ${Qt5Charts_INCLUDE_DIRS}	     # TODO make optional.
+    ${Qt5OpenGL_INCLUDE_DIRS}	     # TODO make optional.
     ${Qt5PrintSupport_INCLUDE_DIRS}
   endif (USE_QT5)
 
   ${GC_INCLUDE_DIRS}
   ${QWT_INCLUDE_DIR}
   ${QXT_INCLUDE_DIR}
-  ${CMAKE_CURRENT_BINARY_DIR} # May be needed to ui_*.h files (see https://anteru.net/2009/09/07/582/).
+  ${CMAKE_CURRENT_BINARY_DIR} # May be needed to find generated (ui_*.h) files (see https://anteru.net/2009/09/07/582/).
   )
 
 if (USE_QT5)
   set (GC_QT_LIBS "Qt5::Widgets")
-  set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::Core")
+  set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::Core") 
+  #set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::LinguistTools")
   set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::Xml")
   set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::Sql") 
   set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::Network")
@@ -1471,22 +1527,29 @@ if (USE_QT5)
   set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::SerialPort")
   set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::Multimedia")
   set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::MultimediaWidgets")
-  #set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::PrintSupport")
+  set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::WebKitWidgets") # TODO make optional.
+  set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::Bluetooth") # TODO make optional.
+  set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::Charts") # TODO make optional.
+  set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::OpenGL") # TODO make optional.
+  set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::PrintSupport")
 else (USE_QT5)
   set (GC_QT_LIBS "${QT_LIBRARIES}")
 endif (USE_QT5)
 
 add_executable(GoldenCheetah
-  ${GC_SOURCE_FILES} 
   ${GC_HEADER_FILES_MOC}
-  ${QWT_SOURCE_FILES_MOC}
-  ${QXT_SOURCE_FILES_MOC}
+  ${GC_RCC_FILES}
+  ${GC_SOURCE_FILES} 
+  ${QWT_HEADER_FILES_MOC}
+  ${QWT_SOURCE_FILES}
+  ${QXT_HEADER_FILES_MOC}
+  #${QXT_SOURCE_FILES}
   )
 
 # Deps.
 target_link_libraries (GoldenCheetah
   ${GC_QT_LIBS}
-  ${ZLIB_LIBRARIES}
+  ${ZLIB_LIBRARIES}		# TODO add this only when needed.
   #${QWT_LIBRARIES}
   )
 
