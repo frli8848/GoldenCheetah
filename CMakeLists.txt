@@ -134,7 +134,8 @@ option (USE_SAMPLERATE "Enable if you want to resample with high fidelity" OFF)
 #CONFIG   += link_pkgconfig
 #PKGCONFIG = 
 
-option (USE_LMFIT "Enable if you want support for LMFit (for model fitting Banister models)" OFF)
+# Not used yet.
+#option (USE_LMFIT "Enable if you want support for LMFit (for model fitting Banister models)" OFF)
 
 # If your QT build includes its own local compress libs
 # then you should comment the line below, otherwise you
@@ -495,6 +496,8 @@ qt5_add_translation (GC_GM_FILES ${GC_TS_FILES})
 ### OPTIONAL => LMFIT Model fitting library
 ###========================================
 
+# Not used yet.
+
 # We use LMFit for model fitting Banister models
 # download from http://apps.jcns.fz-juelich.de/src/lmfit/
 #LMFIT_INSTALL = /usr/local
@@ -502,7 +505,7 @@ qt5_add_translation (GC_GM_FILES ${GC_TS_FILES})
 # http://apps.jcns.fz-juelich.de/doku/sc/lmfit
 # http://apps.jcns.fz-juelich.de/src/lmfit/
 
-if (USE_LMFIT) # TODO: Which version is required?
+#if (USE_LMFIT) # TODO: Which version is required?
 
   #find_package (LMFIT)
   
@@ -514,7 +517,7 @@ if (USE_LMFIT) # TODO: Which version is required?
   #LIBS        += $${LMFIT_LIBS}
   #DEFINES     += GC_HAVE_LMFIT
 
-endif (USE_LMFIT)
+#endif (USE_LMFIT)
 
 ###=========================
 ### OPTIONAL => Embed Python
@@ -575,7 +578,7 @@ if (USE_PYTHON) # TODO: We also need NOWEBKIT=on here?
     
   else (Qt5Widgets_VERSION GREATER_EQUAL 5.8 AND SIP_VERSION_STR GREATER_EQUAL 4.19)
     
-    message (STATUS "INFO: Embedded Python requires version QT >= 5.8 (no support for ${Qt5Widgets_VERSION}) and SIPS 4.19+")
+    message (STATUS "INFO: Embedded Python requires version QT >= 5.8 (no support for ${Qt5Widgets_VERSION}) and SIP 4.19+")
     
   endif(Qt5Widgets_VERSION GREATER_EQUAL 5.8 AND SIP_VERSION_STR GREATER_EQUAL 4.19)
 
