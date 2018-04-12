@@ -522,70 +522,63 @@ endif (USE_LMFIT)
 
 if (USE_PYTHON) # TODO: We also need NOWEBKIT=on here?
 
-  # TODO we also need dev-python/sip -  cen we check for that?
-  
   find_package (PythonLibs 3.6 REQUIRED) # TODO: Is v 3.6 required?
-
+  
   find_package(PythonInterp REQUIRED)
   #ind_package (SIP 4.19 REQUIRED)
   find_package (SIP REQUIRED)
   
-  if (PYTHONLIBS_FOUND)
-    
-    message (STATUS "Python libs:${PYTHON_LIBRARIES}")
-    message (STATUS "Python include dir: ${PYTHON_INCLUDE_DIRS}")
-    message (STATUS "Python lib version: ${PYTHONLIBS_VERSION_STRING}")
-
-    message (STATUS "Using Python: ${PYTHON_EXECUTABLE}") 
-    message (STATUS "Python version: ${PYTHON__EXECUTABLE_VERSION}")
-    message (STATUS "SIP version: ${SIP_VERSION_STRING}")
-    
-    
-    if (Qt5Widgets_VERSION GREATER_EQUAL 5.8)
-
-      # TODO: Do we really need to check for Qt 4.8+ on GC 3?
-      
-      add_definitions( -DGC_WANT_PYTHON ) # TODO Is this one really needed?
-      set (GC_INCLUDE_DIRS ${GC_INCLUDE_DIRS} "src/Python")
-
-      add_definitions( -DSIP_STATIC_MODULE )
-      set (GC_OPT_INCLUDE_DIRS ${GC_OPT_INCLUDE_DIRS} ${PYTHON_INCLUDE_DIRS})
-      set (GC_OPT_LIBS ${GC_OPT_LIBS} ${PYTHON_LIBRARIES})
-
-      ## Python integration
-      
-      set (GC_HEADER_FILES ${GC_HEADER_FILES}
-	src/Python/PythonEmbed.h src/Charts/PythonChart.h src/Python/PythonSyntax.h
-	)
+  message (STATUS "Python libs:${PYTHON_LIBRARIES}")
+  message (STATUS "Python include dir: ${PYTHON_INCLUDE_DIRS}")
+  message (STATUS "Python lib version: ${PYTHONLIBS_VERSION_STRING}")
   
-      set (GC_SOURCE_FILES ${GC_SOURCE_FILES}
-	src/Python/PythonEmbed.cpp src/Charts/PythonChart.cpp src/Python/PythonSyntax.cpp
-	)
-
-      ## Python SIP generated module
-
-      set (GC_SOURCE_FILES ${GC_SOURCE_FILES}
-	src/Python/SIP/sipgoldencheetahBindings.cpp src/Python/SIP/sipgoldencheetahcmodule.cpp
-	src/Python/SIP/Bindings.cpp
-	)
-      
-      ## SIP type conversion
-
-      set (GC_SOURCE_FILES ${GC_SOURCE_FILES}
-	src/Python/SIP/sipgoldencheetahQString.cpp
-	src/Python/SIP/sipgoldencheetahPythonDataSeries.cpp
-	)
-
-      add_definitions( -DGC_HAVE_PYTHON )
-      
-    else (Qt5Widgets_VERSION GREATER_EQUAL 5.8)
-      
-      message (STATUS "INFO: Embedded Python requires version QT >= 5.8, no support for ${Qt5Widgets_VERSION}")
-      
-    endif(Qt5Widgets_VERSION GREATER_EQUAL 5.8)
-    
-  endif (PYTHONLIBS_FOUND)
+  message (STATUS "Using Python: ${PYTHON_EXECUTABLE}") 
+  message (STATUS "Python version: ${PYTHON_VERSION_STRING}")
+  message (STATUS "SIP version: ${SIP_VERSION_STR}")
   
+  if (Qt5Widgets_VERSION GREATER_EQUAL 5.8 AND SIP_VERSION_STR GREATER_EQUAL 4.19)
+    
+    # TODO: Do we really need to check for Qt 4.8+ on GC 3?
+    
+    add_definitions( -DGC_WANT_PYTHON ) # TODO Is this one really needed?
+    set (GC_INCLUDE_DIRS ${GC_INCLUDE_DIRS} "src/Python")
+    
+    add_definitions( -DSIP_STATIC_MODULE )
+    set (GC_OPT_INCLUDE_DIRS ${GC_OPT_INCLUDE_DIRS} ${PYTHON_INCLUDE_DIRS})
+    set (GC_OPT_LIBS ${GC_OPT_LIBS} ${PYTHON_LIBRARIES})
+    
+    ## Python integration
+    
+    set (GC_HEADER_FILES ${GC_HEADER_FILES}
+      src/Python/PythonEmbed.h src/Charts/PythonChart.h src/Python/PythonSyntax.h
+      )
+    
+    set (GC_SOURCE_FILES ${GC_SOURCE_FILES}
+      src/Python/PythonEmbed.cpp src/Charts/PythonChart.cpp src/Python/PythonSyntax.cpp
+      )
+    
+    ## Python SIP generated module
+    
+    set (GC_SOURCE_FILES ${GC_SOURCE_FILES}
+      src/Python/SIP/sipgoldencheetahBindings.cpp src/Python/SIP/sipgoldencheetahcmodule.cpp
+      src/Python/SIP/Bindings.cpp
+      )
+    
+    ## SIP type conversion
+    
+    set (GC_SOURCE_FILES ${GC_SOURCE_FILES}
+      src/Python/SIP/sipgoldencheetahQString.cpp
+      src/Python/SIP/sipgoldencheetahPythonDataSeries.cpp
+      )
+    
+    add_definitions( -DGC_HAVE_PYTHON )
+    
+  else (Qt5Widgets_VERSION GREATER_EQUAL 5.8 AND SIP_VERSION_STR GREATER_EQUAL 4.19)
+    
+    message (STATUS "INFO: Embedded Python requires version QT >= 5.8 (no support for ${Qt5Widgets_VERSION}) and SIPS 4.19+")
+    
+  endif(Qt5Widgets_VERSION GREATER_EQUAL 5.8 AND SIP_VERSION_STR GREATER_EQUAL 4.19)
+
 endif (USE_PYTHON)
 
 ###====================
