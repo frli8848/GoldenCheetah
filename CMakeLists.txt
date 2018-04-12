@@ -36,35 +36,7 @@ if (NOWEBKIT)
   add_definitions( -DNOWEBKIT )
 endif (NOWEBKIT)
 
-# Enable if you want an R chart
-# You will need R installed along with the Rcpp and RInside
-# packages. There is an R script in the `util' directory that
-# can be run to install these packages; see it for more info.
-
 option (USE_R "Enable if you want an R chart" OFF)
-
-# Enable if you want Python charting / ML etc
-# You will need Python Development tools installed
-# PYTHONHEADER goes directly into the header file so
-# make sure you escape the braces etc
-#
-# Libs needed can typically be found by calling e.g
-# python3.6-config --libs
-#
-# below 3 lines work well on Linux style OS
-#DEFINES += GC_WANT_PYTHON
-#PYTHONINCLUDES = -I/usr/include/python3.6
-#PYTHONLIBS = -L/usr/lib/python3.6/config-3.6m-x86_64-linux-gnu -lpython3.6m
-#
-# below 3 lines work well on Windows
-#DEFINES += GC_WANT_PYTHON
-#PYTHONINCLUDES = -I\"C:\Program Files\Python36\include\"
-#PYTHONLIBS = -L\"C:\Program Files\Python36\libs\" -lpython36
-#
-#Below work ok on MacOS High Sierra
-#DEFINES += GC_WANT_PYTHON
-#PYTHONINCLUDES = -I/Library/Frameworks/Python.framework/Versions/3.6/include/python3.6m
-#PYTHONLIBS = -L/Library/Frameworks/Python.framework/Versions/3.6/lib -lpython3.6m
 
 option (USE_PYTHON "Enable if you want Python charting / ML etc" OFF)
 
@@ -89,26 +61,6 @@ endif (LRELEASE)
 # MSVC needs the WINDOWS KIT libraries for the memory model you are building
 #WINKIT_INSTALL= "C:/Program Files (x86)/Windows Kits/8.1/Lib/winv6.3/um/x64"
 
-# Let us know where flex and bison are installed.
-# You may need to specify the full path if things don't work.
-#QMAKE_LEX  = flex
-#QMAKE_YACC = bison
-# If you're compiling with nmake and VC then you
-# will likely also use win_flex and win_bison
-# so uncomment below
-#QMAKE_LEX = win_flex
-#QMAKE_YACC = win_bison
-#win32 {
-#  QMAKE_YACC = bison --file-prefix=y -t
-#  QMAKE_MOVE = cmd /c move
-#  QMAKE_DEL_FILE = rm -f
-#}
-
-#find_program (LEX NAMES flex REQUIRED)
-#if (LEX)
-#  message (STATUS "Using lex: ${LEX}")
-#endif (LEX)
-
 find_package(FLEX REQUIRED)
 find_package(BISON REQUIRED)
 
@@ -128,31 +80,7 @@ find_package(BISON REQUIRED)
 
 option (USE_SRMIO "Enable if you want SRM download support" OFF)
 
-# If you want Twitter support you must install a QT OAUTH library kQoAUTH
-#     http://github.com/kypeli/kQOAuth (Version >= 0.98 - tested with 0.98))
-# Set path to the root of the OAUTH installation
-# If you installed in /usr/local/kqoauth then set
-# KQOAUTH_INSTALL = /usr/local/kqoauth
-# This will automatically set:
-# KQOAUTH_INCLUDE = $${KQOAUTH_INSTALL}/src
-# KQOAUTH_LIBS    = $${KQOAUTH_INSTALL}/lib/libkqoauthd0.a   // if in DEBUG mode
-# KQOAUTH_LIBS    = $${KQOAUTH_INSTALL}/lib/libkqoauth0.a    // if in RELEASE mode
-# You may override the INCLUDE and LIB files if you like.
-# You *must* define KQOAUTH_INSTALL to use this feature.
-
-#KQOAUTH_INSTALL = 
-#KQOAUTH_INCLUDE =
-#KQOAUTH_LIBS =
-
 option (USE_KQOAUTH "Enable if you want Twitter support" OFF)
-
-# For TrainingPeaks.com upload/download you need to install the Qt Soap add-on
-#     http://qt.nokia.com/products/appdev/add-on-products/catalog/4/Utilities/qtsoap
-# If qtsoap.pri is install in /usr/local/qtsolutions/soap/ then set
-# QTSOAP_INSTALL = /usr/local/qtsolutions/soap
-# By default we use a copy of Qt Soap in the GIT repository.
-# You *must* define QTSOAP_INSTALL to use a different version than this.
-#QTSOAP_INSTALL = 
 
 option (USE_QTSOAP "Enable if you want TrainingPeaks.com upload/download" OFF)
 
@@ -178,22 +106,6 @@ option (USE_QTSOAP "Enable if you want TrainingPeaks.com upload/download" OFF)
 
 option (USE_KML "Enable if you want support for Google Earth .kml files" OFF)
 
-# If you want support for downloading from iCal calendars you will need libical
-#     http://sourceforge.net/projects/freeassociation/
-# Set path to the root of the libical installation
-# If you installed in /usr/local/libical then set
-# ICAL_INSTALL = /usr/local/libical
-# This will automatically set:
-# ICAL_INCLUDE = $${ICAL_INSTALL}/include 
-# ICAL_LIBS    = $${ICAL_INSTALL}/lib/libical.a
-# You may override the INCLUDE and LIB files if you like.
-# You *must* define ICAL_INSTALL to use this feature.
-#ICAL_INSTALL = 
-#ICAL_INCLUDE = 
-#ICAL_LIBS    =
-#
-# libical has moved to GitHub: http://libical.github.io/libical/ 
-
 option (USE_ICAL "Enable if you want support for downloading from iCal calendars" OFF)
 
 # If you want support for using USB1 sticks in Train View on Windows
@@ -209,63 +121,9 @@ option (USE_ICAL "Enable if you want support for downloading from iCal calendars
 
 option (USE_USBXPRESS "Enable if you want support for using USB1 sticks in Train View on Windows" OFF)
 
-# If you want support for using USB2 sticks in Train View on Linux or Windows
-# then you need to install libusb (Linux) version 0.1.12 
-# or libusb-win32 (Windows) version 1.2.6.0
-# For Linux builds download: (There is a copy in the contrib directory)
-#     http://prdownloads.sourceforge.net/libusb/libusb-0.1.12.tar.gz
-# For Windows builds download:
-#     ttps://sourceforge.net/projects/libusb-win32/files/libusb-win32-releases/1.2.6.0/
-# You may override the INCLUDE and LIB files if you like.
-# You *must* define LIBUSB_INSTALL to use this feature.
-#LIBUSB_INSTALL = /usr/local
-#LIBUSB_INCLUDE = 
-#LIBUSB_LIBS    = 
-
 option (USE_LIBUSB "Enable if you want support for using USB2 sticks in Train View on Linux or Windows" OFF)
 
-# if you want video playback on training mode then
-# download and install vlc (videolan) from
-# ftp.videolan.org/pub/vlc/1.1.8 or http://download.videolan.org/vlc/ for 
-# your platform there are sdks for Mac and Windows. On Linux you
-# will need to use the latest distro (e.g. Meerkat
-# on Ubuntu) to be sure apt-get installs the latest
-# builds (we need 1.1.8 or higher).
-# Set path to the root of the VLC installation
-# If the are installed in /usr/local/vlc then set
-# VLC_INSTALL = /usr/local/vlc
-# This will automatically set (Windows and Unix):
-# VLC_INCLUDE = $${VLC_INSTALL}/include 
-# For Windows
-# VLC_LIBS    = $${VLC_INSTALL}/lib/libvlc.dll.a
-# For Unix
-# VLC_LIBS    = -lvlc
-# You may override the INCLUDE and LIB files if you like.
-# You *must* define VLC_INSTALL to use this feature.
-#VLC_INSTALL = 
-#VLC_INCLUDE = 
-#VLC_LIBS    = 
-
-# *** Mac users NOTE ***
-# On MAC you don't need libvlc since we use the
-# native QTKit (OSX framework) for video playback
-# using Quicktime and on 10.6 or higher Quicktime X
-#
-
 option (USE_VLC "Enable if you want video playback on training mode" OFF)
-
-# if you want to resample with high fidelity we can use the
-# libsamplerate libraries, this is used in RideFile::resample()
-# if you don't resample (e.g. export or merge with new recording
-# intervals) then don't bother.
-#
-# Mainly tested on Linux, compilation on Windows requires
-# some modifications in the build process to build with MSVC2015 
-# Code is available at: http://www.mega-nerd.com/SRC/
-#
-#SAMPLERATE_INSTALL = /usr/local
-#SAMPLERATE_INCLUDE = /usr/local/include
-#SAMPLERATE_LIBS = /usr/local/lib/libsamplerate.a
 
 option (USE_SAMPLERATE "Enable if you want to resample with high fidelity" OFF)
 
@@ -275,10 +133,6 @@ option (USE_SAMPLERATE "Enable if you want to resample with high fidelity" OFF)
 # Uncomment the following two lines to enable.
 #CONFIG   += link_pkgconfig
 #PKGCONFIG = 
-
-# We use LMFit for model fitting Banister models
-# download from http://apps.jcns.fz-juelich.de/src/lmfit/
-#LMFIT_INSTALL = /usr/local
 
 option (USE_LMFIT "Enable if you want support for LMFit (for model fitting Banister models)" OFF)
 
@@ -336,15 +190,6 @@ endif (USE_ROBOT)
 # USING THE WITHINGS API (http://oauth.withings.com/api)
 #DEFINES += GC_WITHINGS_CONSUMER_KEY=\\\"xxxxxxxxxxxxxxx\\\"
 #DEFINES += GC_WITHINGS_CONSUMER_SECRET=\\\"xxxxxxxxxxxxxxx\\\"
-
-# What video playback do you want?
-#DEFINES += GC_VIDEO_NONE             # dont add any video playback support
-#DEFINES += GC_VIDEO_QUICKTIME        # mac only and the default
-#DEFINES += GC_VIDEO_QT5              # use QT5 qvideowidget if QT > 5.2.1
-#DEFINES += GC_VIDEO_VLC              # use VideoLan library needs VLC_INSTALL defined above
-#DEFINES += GC_VIDEO_AV               # use AV Foundation on Mac now QTKit is deprecated
-
-option (USE_VLC "Enable if you want support for video playback" OFF)
 
 # Using the GoldenCheetah/CloudDB feature (with a private CloudDB instance)
 # requires that you have a running instance of CloudDB on Google App Engine
@@ -650,7 +495,14 @@ qt5_add_translation (GC_GM_FILES ${GC_TS_FILES})
 ### OPTIONAL => LMFIT Model fitting library
 ###========================================
 
-if (USE_LMFIT)
+# We use LMFit for model fitting Banister models
+# download from http://apps.jcns.fz-juelich.de/src/lmfit/
+#LMFIT_INSTALL = /usr/local
+
+# http://apps.jcns.fz-juelich.de/doku/sc/lmfit
+# http://apps.jcns.fz-juelich.de/src/lmfit/
+
+if (USE_LMFIT) # TODO: Which version is required?
 
   #find_package (LMFIT)
   
@@ -805,6 +657,24 @@ if (USE_KQOAUTH)
   
 endif (USE_KQOAUTH)
 
+###====================
+### OPTIONAL => QTSOAP
+###====================
+
+# TODO Is this still supported?
+
+# For TrainingPeaks.com upload/download you need to install the Qt Soap add-on
+#  http://qt.nokia.com/products/appdev/add-on-products/catalog/4/Utilities/qtsoap
+# If qtsoap.pri is install in /usr/local/qtsolutions/soap/ then set
+# QTSOAP_INSTALL = /usr/local/qtsolutions/soap
+# By default we use a copy of Qt Soap in the GIT repository.
+# You *must* define QTSOAP_INSTALL to use a different version than this.
+#QTSOAP_INSTALL = 
+
+if (USE_QTSOAP) 
+
+endif (USE_QTSOAP)
+
 ###=======================================================
 ### OPTIONAL => D2XX FOR FTDI DRIVERS ON WINDOWS PLATFORMS
 ###=======================================================
@@ -828,6 +698,8 @@ endif (USE_D2XX)
 ###==================
 ### OPTIONAL => SRMIO
 ###==================
+
+# http://www.zuto.de/project/srmio
 
 if (USE_SRMIO)
   
@@ -952,6 +824,41 @@ endif (WIN32)
 ### OPTIONAL => VLC [Windows and Unix. OSX uses QuickTime Video]
 ###=============================================================
 
+# if you want video playback on training mode then
+# download and install vlc (videolan) from
+# ftp.videolan.org/pub/vlc/1.1.8 or http://download.videolan.org/vlc/ for 
+# your platform there are sdks for Mac and Windows. On Linux you
+# will need to use the latest distro (e.g. Meerkat
+# on Ubuntu) to be sure apt-get installs the latest
+# builds (we need 1.1.8 or higher).
+# Set path to the root of the VLC installation
+# If the are installed in /usr/local/vlc then set
+# VLC_INSTALL = /usr/local/vlc
+# This will automatically set (Windows and Unix):
+# VLC_INCLUDE = $${VLC_INSTALL}/include 
+# For Windows
+# VLC_LIBS    = $${VLC_INSTALL}/lib/libvlc.dll.a
+# For Unix
+# VLC_LIBS    = -lvlc
+# You may override the INCLUDE and LIB files if you like.
+# You *must* define VLC_INSTALL to use this feature.
+#VLC_INSTALL = 
+#VLC_INCLUDE = 
+#VLC_LIBS    = 
+
+# *** Mac users NOTE ***
+# On MAC you don't need libvlc since we use the
+# native QTKit (OSX framework) for video playback
+# using Quicktime and on 10.6 or higher Quicktime X
+#
+
+# What video playback do you want?
+#DEFINES += GC_VIDEO_NONE             # dont add any video playback support
+#DEFINES += GC_VIDEO_QUICKTIME        # mac only and the default
+#DEFINES += GC_VIDEO_QT5              # use QT5 qvideowidget if QT > 5.2.1
+#DEFINES += GC_VIDEO_VLC              # use VideoLan library needs VLC_INSTALL defined above
+#DEFINES += GC_VIDEO_AV               # use AV Foundation on Mac now QTKit is deprecated
+
 if (USE_VLC)
   
   # not on a mac as they use quicktime video
@@ -970,6 +877,10 @@ endif (USE_VLC)
 ###=======================
 ### OPTIONAL => SAMPLERATE
 ###=======================
+
+# Mainly tested on Linux, compilation on Windows requires
+# some modifications in the build process to build with MSVC2015 
+# Code is available at: http://www.mega-nerd.com/SRC/
 
 if (USE_SAMPLERATE)
   
