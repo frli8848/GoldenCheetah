@@ -732,23 +732,28 @@ endif (USE_PYTHON)
 ###====================
 
 if (USE_R)
-  
-  #find_package (R)
-  
+
   # Only supports Linux and OSX until RInside and Rcpp support MSVC
   # This is not likely to be very soon, they are heavily dependant on GCC
   # see: http://dirk.eddelbuettel.com/blog/2011/03/25/#rinside_and_qt
-  if (NOT R_HOME)
-    execute_process(COMMAND R RHOME RESULT_VARIABLE R_HOME)
-  endif (NOT R_HOME)
   
-  if (R_HOME)
+  find_package (R REQUIRED)
+  find_r_package (RInside REQUIRED)
+  #install_r_package (RInside)
+  find_r_package (Rcpp REQUIRED)
+  #install_r_package (Rcpp)
+  
+  if (R_EXEC)
     
     add_definitions( -DGC_WANT_R )
+
+    # Path to R.h
+    execute_process(COMMAND ${R_EXEC} "RHOME" RESULT_VARIABLE R_RES OUTPUT_VARIABLE R_HOME OUTPUT_STRIP_TRAILING_WHITESPACE)
+    message (STATUS "RHOME: ${R_HOME}")
+    set (GC_OPT_INCLUDE_DIRS ${GC_OPT_INCLUDE_DIRS} ${R_HOME}/include)
     
     # add R subdirectory to include path
-    #INCLUDEPATH += ./R
-    set (GC_INCLUDE_DIRS "${GC_INCLUDE_DIRS}" "src/R")
+    set (GC_OPT_INCLUDE_DIRS ${GC_OPT_INCLUDE_DIRS} "src/R")
     
     ## include headers and libraries for R
     if (WIN32)
@@ -759,22 +764,30 @@ if (USE_R)
     endif (WIN32)
     
     ## R has lots of compatibility headers for S and legacy R code we don't want
-    #DEFINES += STRICT_R_HEADERS
     add_definitions( -DSTRICT_R_HEADERS )
-    
+  
     ## R integration
-    #HEADERS += R/REmbed.h R/RTool.h R/RGraphicsDevice.h R/RSyntax.h R/RLibrary.h
-    #SOURCES += R/REmbed.cpp R/RTool.cpp R/RGraphicsDevice.cpp R/RSyntax.cpp R/RLibrary.cpp
+    set (GC_HEADER_FILES ${GC_HEADER_FILES}
+      src/R/REmbed.h src/R/RTool.h src/R/RGraphicsDevice.h src/R/RSyntax.h src/R/RLibrary.h
+      )
+    
+    set (GC_SOURCE_FILES ${GC_SOURCE_FILES}
+      src/R/REmbed.cpp src/R/RTool.cpp src/R/RGraphicsDevice.cpp src/R/RSyntax.cpp src/R/RLibrary.cpp
+      )
     
     ## R based charts
-    #HEADERS += Charts/RChart.h Charts/RCanvas.h
-    #SOURCES += Charts/RChart.cpp Charts/RCanvas.cpp
+    set (GC_HEADER_FILES ${GC_HEADER_FILES}
+      src/Charts/RChart.h src/Charts/RCanvas.h
+      )
     
-    ## For hardware accelerated scene rendering
-    #QT += opengl
-    find_package(Qt5OpenGL)
+    set (GC_SOURCE_FILES ${GC_SOURCE_FILES}
+      src/Charts/RChart.cpp src/Charts/RCanvas.cpp
+      )
 
-  endif (R_HOME)
+    ## For hardware accelerated scene rendering
+    find_package(Qt5OpenGL)
+    
+  endif (R_EXEC)
   
 endif (USE_R)
 
@@ -790,12 +803,6 @@ if (USE_KQOAUTH)
   set (GC_OPT_INCLUDE_DIRS ${GC_OPT_INCLUDE_DIRS} ${KQOAUTH_INCLUDE_DIR})
   set (GC_OPT_LIBS ${GC_OPT_LIBS} ${KQOAUTH_LIBRARIES})
   
-  #set (GC_HEADER_FILES ${GC_HEADER_FILES}
-  #  )
-  
-  #set (GC_SOURCE_FILES ${GC_SOURCE_FILES}
-  #  )
-
 endif (USE_KQOAUTH)
 
 ###=======================================================
@@ -1045,7 +1052,7 @@ if (USE_CloudDB)
   else (Qt5Widgets_VERSION GREATER_EQUAL 5.5)
     
     # QT5 but not 5.5 or higher
-    message(STATUS "INFO: CloudDB requires version QT >= 5.5, no support for ${QT_VERSION}")
+    message(STATUS "INFO: CloudDB requires version QT >= 5.5, no support for ${Qt5Widgets_VERSION}")
     
   endif (Qt5Widgets_VERSION GREATER_EQUAL 5.5)
   
