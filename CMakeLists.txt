@@ -525,13 +525,22 @@ if (USE_PYTHON) # TODO: We also need NOWEBKIT=on here?
   # TODO we also need dev-python/sip -  cen we check for that?
   
   find_package (PythonLibs 3.6 REQUIRED) # TODO: Is v 3.6 required?
+
+  find_package(PythonInterp REQUIRED)
+  #ind_package (SIP 4.19 REQUIRED)
+  find_package (SIP REQUIRED)
   
   if (PYTHONLIBS_FOUND)
     
     message (STATUS "Python libs:${PYTHON_LIBRARIES}")
     message (STATUS "Python include dir: ${PYTHON_INCLUDE_DIRS}")
     message (STATUS "Python lib version: ${PYTHONLIBS_VERSION_STRING}")
-        
+
+    message (STATUS "Using Python: ${PYTHON_EXECUTABLE}") 
+    message (STATUS "Python version: ${PYTHON__EXECUTABLE_VERSION}")
+    message (STATUS "SIP version: ${SIP_VERSION_STRING}")
+    
+    
     if (Qt5Widgets_VERSION GREATER_EQUAL 5.8)
 
       # TODO: Do we really need to check for Qt 4.8+ on GC 3?
