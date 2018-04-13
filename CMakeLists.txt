@@ -82,8 +82,6 @@ option (USE_SRMIO "Enable if you want SRM download support" OFF)
 
 option (USE_KQOAUTH "Enable if you want Twitter support" OFF)
 
-option (USE_QTSOAP "Enable if you want TrainingPeaks.com upload/download" OFF)
-
 # If you want support for Google Earth .kml files then you need
 # to install the Google libkml library
 #
@@ -654,24 +652,6 @@ if (USE_KQOAUTH)
   set (GC_OPT_LIBS ${GC_OPT_LIBS} ${KQOAUTH_LIBRARIES})
   
 endif (USE_KQOAUTH)
-
-###====================
-### OPTIONAL => QTSOAP
-###====================
-
-# TODO Is this still supported?
-
-# For TrainingPeaks.com upload/download you need to install the Qt Soap add-on
-#  http://qt.nokia.com/products/appdev/add-on-products/catalog/4/Utilities/qtsoap
-# If qtsoap.pri is install in /usr/local/qtsolutions/soap/ then set
-# QTSOAP_INSTALL = /usr/local/qtsolutions/soap
-# By default we use a copy of Qt Soap in the GIT repository.
-# You *must* define QTSOAP_INSTALL to use a different version than this.
-#QTSOAP_INSTALL = 
-
-if (USE_QTSOAP) 
-
-endif (USE_QTSOAP)
 
 ###=======================================================
 ### OPTIONAL => D2XX FOR FTDI DRIVERS ON WINDOWS PLATFORMS
