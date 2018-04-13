@@ -192,13 +192,6 @@ endif (USE_ROBOT)
 #DEFINES += GC_WITHINGS_CONSUMER_KEY=\\\"xxxxxxxxxxxxxxx\\\"
 #DEFINES += GC_WITHINGS_CONSUMER_SECRET=\\\"xxxxxxxxxxxxxxx\\\"
 
-# Using the GoldenCheetah/CloudDB feature (with a private CloudDB instance)
-# requires that you have a running instance of CloudDB on Google App Engine
-# (for details on CloudDB please check the documentation here: https://github.com/GoldenCheetah/CloudDB
-#DEFINES +=GC_CLOUD_DB_BASIC_AUTH=
-#DEFINES +=GC_CLOUD_DB_APP_NAME=
-#CloudDB = active
-
 option (USE_CloudDB "Enable if you want support for the GoldenCheetah/CloudDB feature (with a private CloudDB instance)" OFF)
 
 ###======================================================
@@ -947,11 +940,16 @@ endif (USE_HTPATH)
 ## CloudDB is only supported on QT5.5 or higher ##
 ##----------------------------------------------##
 
+# Using the GoldenCheetah/CloudDB feature (with a private CloudDB instance)
+# requires that you have a running instance of CloudDB on Google App Engine
+# (for details on CloudDB please check the documentation here: https://github.com/GoldenCheetah/CloudDB
+
 if (USE_CloudDB)
 
   if (Qt5Widgets_VERSION GREATER_EQUAL 5.5)
 
-    add_definitions ( -DGC_HAS_CLOUD_DB )
+    #DEFINES +=GC_CLOUD_DB_BASIC_AUTH=
+    #DEFINES +=GC_CLOUD_DB_APP_NAME=
     
     set (GC_HEADER_FILES ${GC_HEADER_FILES}
       src/Cloud/CloudDBChart.h src/Cloud/CloudDBCommon.h
@@ -964,6 +962,8 @@ if (USE_CloudDB)
       src/Cloud/CloudDBCurator.cpp src/Cloud/CloudDBStatus.cpp
       src/Cloud/CloudDBVersion.cpp src/Cloud/CloudDBTelemetry.cpp      
       )
+
+    add_definitions ( -DGC_HAS_CLOUD_DB )
     
   else (Qt5Widgets_VERSION GREATER_EQUAL 5.5)
     
