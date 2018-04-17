@@ -36,9 +36,12 @@ if (NOWEBKIT)
   add_definitions( -DNOWEBKIT )
 endif (NOWEBKIT)
 
-option (USE_R "Enable if you want an R chart" OFF)
+# Not used yet.
+#option (USE_LMFIT "Enable if you want support for LMFit (for model fitting Banister models)" OFF)
 
 option (USE_PYTHON "Enable if you want Python charting / ML etc" OFF)
+
+option (USE_R "Enable if you want an R chart" OFF)
 
 # Global conf file name: If you'd like to use a different global config file
 # name than the default (e.g. for testing purposes), set it here.
@@ -132,9 +135,6 @@ option (USE_SAMPLERATE "Enable if you want to resample with high fidelity" OFF)
 #CONFIG   += link_pkgconfig
 #PKGCONFIG = 
 
-# Not used yet.
-#option (USE_LMFIT "Enable if you want support for LMFit (for model fitting Banister models)" OFF)
-
 # If your QT build includes its own local compress libs
 # then you should comment the line below, otherwise you
 # will need to have the compress libraries installed
@@ -196,7 +196,7 @@ option (USE_CloudDB "Enable if you want support for the GoldenCheetah/CloudDB fe
 ### QT MODULES [we officially support QT4.8.6+ or QT5.8+]
 ###======================================================
 
-# Prefer Qt 5
+# Prefer Qt 5 (require Qt 5.8?)
 option(USE_QT5 "Use Qt5 (instead of Qt4)." ON)
 
 if (USE_QT5)
