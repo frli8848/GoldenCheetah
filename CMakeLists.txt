@@ -422,24 +422,30 @@ set (GC_SOURCE_FILES ${GC_SOURCE_FILES}
 
 find_package (Qt5LinguistTools REQUIRED)
 
-set (GC_TS_FILES
-  src/Resources/translations/gc_fr.ts
-  src/Resources/translations/gc_ja.ts
-  src/Resources/translations/gc_it.ts
-  src/Resources/translations/gc_pt-br.ts
-  src/Resources/translations/gc_de.ts
-  src/Resources/translations/gc_cs.ts
-  src/Resources/translations/gc_es.ts
-  src/Resources/translations/gc_pt.ts
-  src/Resources/translations/gc_ru.ts
-  src/Resources/translations/gc_zh-cn.ts
-  src/Resources/translations/gc_zh-tw.ts
-  src/Resources/translations/gc_nl.ts
-  src/Resources/translations/gc_sv.ts
-  )
+#set (GC_TS_FILES
+#  src/Resources/translations/gc_fr.ts
+#  src/Resources/translations/gc_ja.ts
+#  src/Resources/translations/gc_it.ts
+#  src/Resources/translations/gc_pt-br.ts
+#  src/Resources/translations/gc_de.ts
+#  src/Resources/translations/gc_cs.ts
+#  src/Resources/translations/gc_es.ts
+#  src/Resources/translations/gc_pt.ts
+#  src/Resources/translations/gc_ru.ts
+#  src/Resources/translations/gc_zh-cn.ts
+#  src/Resources/translations/gc_zh-tw.ts
+#  src/Resources/translations/gc_nl.ts
+#  src/Resources/translations/gc_sv.ts
+#  )
 
 # This sort-of works but now we put generated files outside the build folder.
-set_source_files_properties(${GC_TS_FILES} PROPERTIES OUTPUT_LOCATION ${CMAKE_CURRENT_BINARY_DIR}/../src/Resources/translations/)
+#set_source_files_properties(${GC_TS_FILES} PROPERTIES OUTPUT_LOCATION ${CMAKE_CURRENT_BINARY_DIR}/../src/Resources/translations/)
+
+# To avoid generating files outside the build folder just copy the Resources folder to the CMAKE_CURRENT_BINARY_DIR.
+file (COPY "src/Resources" DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file (GLOB GC_TS_FILES "${CMAKE_CURRENT_BINARY_DIR}/Resources/translations/*.ts")
+set_source_files_properties(${GC_TS_FILES} PROPERTIES OUTPUT_LOCATION ${CMAKE_CURRENT_BINARY_DIR}/Resources/translations/)
+  
 qt5_add_translation (GC_GM_FILES ${GC_TS_FILES})
 message (STATUS "${GC_GM_FILES}")
 
@@ -475,8 +481,13 @@ message (STATUS "${GC_GM_FILES}")
 
 set (GC_RESOURCES
   ${GC_GM_FILES}
-  src/Resources/application.qrc src/Resources/RideWindow.qrc
+  ${CMAKE_CURRENT_BINARY_DIR}/Resources/application.qrc ${CMAKE_CURRENT_BINARY_DIR}/Resources/application.qrc
   )
+
+#set (GC_RESOURCES
+#  ${GC_GM_FILES}
+#  src/Resources/application.qrc src/Resources/RideWindow.qrc
+#  )
 
 ###############################################################################
 #                                                                             #
