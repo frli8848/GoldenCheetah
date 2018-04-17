@@ -438,9 +438,10 @@ set (GC_TS_FILES
   src/Resources/translations/gc_sv.ts
   )
 
+# This sort-of works but now we put generated files outside the build folder.
+set_source_files_properties(${GC_TS_FILES} PROPERTIES OUTPUT_LOCATION ${CMAKE_CURRENT_BINARY_DIR}/../src/Resources/translations/)
 qt5_add_translation (GC_GM_FILES ${GC_TS_FILES})
-
-#message (STATUS "${GC_GM_FILES}")
+message (STATUS "${GC_GM_FILES}")
 
 # Need lrelease to generate qm files
 #if (NOT LRELEASE)
@@ -472,9 +473,10 @@ qt5_add_translation (GC_GM_FILES ${GC_TS_FILES})
 ### RESOURCES
 ###==========
 
-#set (GC_RESOURCES
-#  src/Resources/application.qrc src/Resources/RideWindow.qrc
-#  )
+set (GC_RESOURCES
+  ${GC_GM_FILES}
+  src/Resources/application.qrc src/Resources/RideWindow.qrc
+  )
 
 ###############################################################################
 #                                                                             #
