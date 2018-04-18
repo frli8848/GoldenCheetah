@@ -82,6 +82,9 @@ find_package(BISON REQUIRED)
 #SRMIO_LIBS    =
 
 option (USE_SRMIO "Enable if you want SRM download support" OFF)
+if (USE_SRMIO)
+  option (DOWNLOAD_SRMIO "Enable if you want to download, build, and install the SRMIO lib." OFF)
+endif (USE_SRMIO)
 
 option (USE_KQOAUTH "Enable if you want Twitter support" OFF)
 
@@ -693,10 +696,12 @@ endif (USE_D2XX)
 # https://github.com/rclasen/srmio
 
 if (USE_SRMIO)
-
-  #if (DOWNLOAD_SRMIO)
-    
-  #endif (DOWNLOAD_SRMIO)
+  
+  # Download, build, and install the SRMIO lib. You will be asked for the root
+  # password by sudo to install the lib.
+  if (DOWNLOAD_SRMIO)
+    add_subdirectory(${CMAKE_SOURCE_DIR}/cmake/external/srmio srmio_build)
+  endif (DOWNLOAD_SRMIO)
   
   find_package (SRMIO REQUIRED)
   
