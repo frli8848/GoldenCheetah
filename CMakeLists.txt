@@ -447,7 +447,6 @@ file (GLOB GC_TS_FILES "${CMAKE_CURRENT_BINARY_DIR}/Resources/translations/*.ts"
 set_source_files_properties(${GC_TS_FILES} PROPERTIES OUTPUT_LOCATION ${CMAKE_CURRENT_BINARY_DIR}/Resources/translations/)
   
 qt5_add_translation (GC_GM_FILES ${GC_TS_FILES})
-message (STATUS "${GC_GM_FILES}")
 
 # Need lrelease to generate qm files
 #if (NOT LRELEASE)
@@ -693,6 +692,12 @@ endif (USE_D2XX)
 # http://www.zuto.de/project/srmio
 
 if (USE_SRMIO)
+
+  if (DOWNLOAD_SRMIO)
+
+    
+
+  endif (DOWNLOAD_SRMIO)
   
   #find_package (SRMIO)
 
