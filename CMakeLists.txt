@@ -447,7 +447,7 @@ find_package (Qt5LinguistTools REQUIRED)
 # To avoid generating files outside the build folder just copy the Resources folder to the CMAKE_CURRENT_BINARY_DIR.
 file (COPY "src/Resources" DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file (GLOB GC_TS_FILES "${CMAKE_CURRENT_BINARY_DIR}/Resources/translations/*.ts")
-set_source_files_properties(${GC_TS_FILES} PROPERTIES OUTPUT_LOCATION ${CMAKE_CURRENT_BINARY_DIR}/Resources/translations/)
+set_source_files_properties(${GC_TS_FILES} PROPERTIES OUTPUT_LOCATION ${CMAKE_CURRENT_BINARY_DIR}/Resources/translations)
   
 qt5_add_translation (GC_GM_FILES ${GC_TS_FILES})
 
