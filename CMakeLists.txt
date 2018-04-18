@@ -690,28 +690,28 @@ endif (USE_D2XX)
 ###==================
 
 # http://www.zuto.de/project/srmio
+# https://github.com/rclasen/srmio
 
 if (USE_SRMIO)
 
-  if (DOWNLOAD_SRMIO)
-
+  #if (DOWNLOAD_SRMIO)
     
-
-  endif (DOWNLOAD_SRMIO)
+  #endif (DOWNLOAD_SRMIO)
   
-  #find_package (SRMIO)
-
-  # we will work out the rest if you tell use where it is installed
-  #isEmpty(SRMIO_INCLUDE) { SRMIO_INCLUDE = $${SRMIO_INSTALL}/include }
-  #isEmpty(SRMIO_LIBS)    { SRMIO_LIBS    = -L$${SRMIO_INSTALL}/lib -lsrmio }
+  find_package (SRMIO REQUIRED)
   
-  #DEFINES     += GC_HAVE_SRMIO
-  #INCLUDEPATH += $${SRMIO_INCLUDE}
-  #LIBS        += $${SRMIO_LIBS}
+  set (GC_OPT_INCLUDE_DIRS ${GC_OPT_INCLUDE_DIRS} ${LIBSRMIO_INCLUDE_DIR})
+  set (GC_OPT_LIBS ${GC_OPT_LIBS} ${LIBSRMIO_LIBRARIES})
   
-  # add support for srm downloads
-  #HEADERS     += FileIO/SrmDevice.h
-  #SOURCES     += FileIO/SrmDevice.cpp
+  add_definitions( -DGC_HAVE_SRMIO )
+  
+  set (GC_HEADER_FILES ${GC_HEADER_FILES}
+    src/FileIO/SrmDevice.h
+    )
+  
+  set (GC_SOURCE_FILES ${GC_SOURCE_FILES}
+    src/FileIO/SrmDevice.cpp
+    )
   
 endif (USE_SRMIO)
 
