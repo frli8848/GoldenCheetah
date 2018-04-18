@@ -725,6 +725,10 @@ endif (USE_SRMIO)
 ### OPTIONAL => GOOGLE KML IMPORT EXPORT
 ###=====================================
 
+# libkml currently don't build (on Linux)!?
+
+# https://github.com/google/libkml
+
 if (USE_KML)
   
   # we will work out the rest if you tell use where it is installed
