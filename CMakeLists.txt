@@ -7,7 +7,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
 # Grab the version number from the git repo.
 #
-# http://brianmilco.blogspot.no/2012/11/cmake-automatically-use-git-tags-as.html 
+# http://brianmilco.blogspot.no/2012/11/cmake-automatically-use-git-tags-as.html
 include(GetGitRevisionDescription)
 #git_describe(VERSION --tags --dirty=-dirty)
 git_describe(VERSION tag)
@@ -30,226 +30,45 @@ message(STATUS "GoldenCheetah version: ${GC_VERSION_SHORT} [${VERSION_SHA1}]")
 #                                                                             #
 ###############################################################################
 
-# Enable when WebKit is not available (e.g. QT >= 5.6) TODO let cmake probe for Qt version instead?
-option (NOWEBKIT "Enable when WebKit is not available (e.g. QT >= 5.6)" OFF)
-if (NOWEBKIT)
-  add_definitions( -DNOWEBKIT )
-endif (NOWEBKIT)
-
-# Not used yet.
-#option (USE_LMFIT "Enable if you want support for LMFit (for model fitting Banister models)" OFF)
-
-option (USE_PYTHON "Enable if you want Python charting / ML etc" OFF)
-
-option (USE_R "Enable if you want an R chart" OFF)
-
-# Global conf file name: If you'd like to use a different global config file
-# name than the default (e.g. for testing purposes), set it here.
-#DEFINES += GC_SETTINGS_APP=\\\"GoldenCheetahTest\\\"
-
-# If you want a console window to appear on Windows machines
-# then uncomment the following two lines.
-#ONFIG += console
-#QMAKE_LFLAGS = -mwindows
-
-# To compile translation you need QT tool - lrelease
-# If it is not found using he defaults in src/src.pro
-# then set the full path and filename here.
-#QMAKE_LRELEASE = /usr/bin/lrelease
-find_program (LRELEASE NAMES lrelease REQUIRED)
-if (LRELEASE)
-  message (STATUS "Using lrelease: ${LRELEASE}")
-endif (LRELEASE)
-
-# MSVC needs the WINDOWS KIT libraries for the memory model you are building
-#WINKIT_INSTALL= "C:/Program Files (x86)/Windows Kits/8.1/Lib/winv6.3/um/x64"
-
 find_package(FLEX REQUIRED)
 find_package(BISON REQUIRED)
 
-# If you want SRM download support you must install SRMIO
-#     http://www.zuto.de/project/srmio/
-# Set path to the root of the SRMIO installation
-# If you installed in /usr/local/srmio then set
-# SRMIO_INSTALL = /usr/local/srmio
-# This will automatically set:
-# SRMIO_INCLUDE = $${SRMIO_INSTALL}/include 
-# SRMIO_LIBS    = $${SRMIO_INSTALL}/lib/libsrmio.a
-# You may override the INCLUDE and LIB files if you like.
-# You *must* define SRMIO_INSTALL to use this feature.
-#SRMIO_INSTALL = 
-#SRMIO_INCLUDE = 
-#SRMIO_LIBS    =
+# GNU Scientific Library
+find_package(GSL REQUIRED)
 
-option (USE_SRMIO "Enable if you want SRM download support" OFF)
-if (USE_SRMIO)
-  option (DOWNLOAD_SRMIO "Enable if you want to download, build, and install the SRMIO lib." OFF)
-endif (USE_SRMIO)
+###========================================================================
+### QT5.14.2 officially supported which mandates c++11 support in toolchain
+###========================================================================
 
-option (USE_KQOAUTH "Enable if you want Twitter support" OFF)
+find_package (Qt5Widgets 5.8 REQUIRED)
+find_package (Qt5Core REQUIRED)
+find_package (Qt5Xml REQUIRED)
+find_package (Qt5Sql REQUIRED)
+find_package (Qt5Network REQUIRED)
+find_package (Qt5Svg REQUIRED)
+find_package (Qt5Concurrent REQUIRED)
+find_package (Qt5SerialPort REQUIRED)
+find_package (Qt5MultimediaWidgets REQUIRED)
+find_package (Qt5PrintSupport REQUIRED)
 
-# If you want support for Google Earth .kml files then you need
-# to install the Google libkml library
-#
-# http://code.google.com/p/libkml/
-# or on Linux sudo apt-get install libkml-dev
-#
-# then set the following variable appropriately
-# to the root of the libs/include path
-#KML_INSTALL = /usr/local
-#KML_INCLUDE = 
-#KML_LIBS    = 
-# Since KML also requires BOOST you will need to install
-# that too and then set BOOST_INCLUDE to that location
-# If the files are in /usr/include/boost then set
-#BOOST_INCLUDE = /usr/include
-#Additionally, on MAC the latest libs also need the following
-#QMAKE_CFLAGS_X86_64 += -mmacosx-version-min=10.7
-#QMAKE_CXXFLAGS_X86_64 = $$QMAKE_CFLAGS_X86_64
-#LIBS += -lexpat -luriparser -lminizip
+if (Qt5Widgets_VERSION VERSION_GREATER_EQUAL 5.6) # We require Qt >= 5.8 so we could skip the 2nd test here (?).
+  set (CMAKE_CXX_STANDARD 11)
+  find_package (Qt5WebEngine REQUIRED)
+  find_package (Qt5WebEngineCore REQUIRED)
+  find_package (Qt5WebEngineWidgets REQUIRED)
+  find_package (Qt5WebChannel REQUIRED)
+  find_package (Qt5Positioning REQUIRED)
+else (Qt5Widgets_VERSION VERSION_GREATER_EQUAL 5.6)
+  # On 5.5 or earlier we can still use WebKit
+  find_package (Qt5WebKitWidgets)
+endif (Qt5Widgets_VERSION VERSION_GREATER_EQUAL 5.6)
 
-option (USE_KML "Enable if you want support for Google Earth .kml files" OFF)
+set(CMAKE_AUTOMOC ON)
+#set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTORCC ON)
 
-option (USE_ICAL "Enable if you want support for downloading from iCal calendars" OFF)
+message (STATUS "Qt version: ${Qt5Widgets_VERSION}")
 
-# If you want support for using USB1 sticks in Train View on Windows
-# then install the SiLabs USBXpress Software Development Kit (SDK)
-#     http://www.silabs.com/products/mcu/Pages/USBXpress.aspx
-# and set the following to the 'Host' directory within the SDK
-# USBXPRESS_INSTALL = /c/SiLabs/MCU/USBXpress/USBXpress_API/Host/
-# You may override the INCLUDE and LIB files if you like.
-# You *must* define USBXPRESS_INSTALL to use this feature.
-#USBXPRESS_INSTALL = 
-#USBXPRESS_INCLUDE = 
-#USBXPRESS_LIBS    = 
-
-option (USE_USBXPRESS "Enable if you want support for using USB1 sticks in Train View on Windows" OFF)
-
-option (USE_LIBUSB "Enable if you want support for using USB2 sticks in Train View on Linux or Windows" OFF)
-
-option (USE_VLC "Enable if you want video playback on training mode" OFF)
-
-option (USE_SAMPLERATE "Enable if you want to resample with high fidelity" OFF)
-
-# If your system has PKG_CONFIG, QT can use this to get dependent libraries.
-# Add the names of libraries with PKG_CONFIG information.
-# eg. PKGCONFIG = oauth libical
-# Uncomment the following two lines to enable.
-#CONFIG   += link_pkgconfig
-#PKGCONFIG = 
-
-# If your QT build includes its own local compress libs
-# then you should comment the line below, otherwise you
-# will need to have the compress libraries installed
-# separately. 
-#LIBZ_INCLUDE =
-#LIBZ_LIBS    = -lz
-
-#macx {
-#    # Uncomment this line to build with OS X Tiger support on a Leopard system:
-#    #QMAKE_MAC_SDK=/Developer/SDKs/MacOSX10.4u.sdk
-#
-#    # Uncomment this line to build a OS X universal binary:
-#    #CONFIG+=x86 ppc
-#
-#    # Uncomment this line if you have SDK 10.7 or higher
-#    #DEFINES += GC_HAVE_LION
-#
-#    #uncomment below if you are running on the 10.9 developer preview
-#    #INCLUDEPATH += /Library/Developer/CommandLineTools/SDKs/MacOSX10.9.sdk/usr/include/ 
-#}
-
-# uncomment below for R integration via webservices
-#HTPATH = ../httpserver
-
-option (USE_HTPATH "Enable if you want R integration via webservices" OFF)
-
-# Enable if you want a 'robot' to test realtime code without having
-# to get on your trainer and ride
-
-option (USE_ROBOT "Enable if you want 'robot' to test realtime code" OFF)
-
-if (USE_ROBOT)
-  add_definitions( -DGC_WANT_ROBOT )
-endif (USE_ROBOT)
-
-#if you have a version of mingw that properly provides
-#the Dwmapi.h header then uncomment this line
-#DEFINES += GC_HAVE_DWM
-
-# USING THE DROPBOX API
-# register your app at https://www.dropbox.com/developers/apps and
-# make sure the redirect_uri for the app includes  the url: 
-# https://goldencheetah.github.io/blank.html and full permissions 
-# are granted. Then set the client # and secret in the two defines
-# below replacing the xxxxxxxxxxxxxx with the actual values.
-#DEFINES += GC_DROPBOX_CLIENT_ID=\\\"xxxxxxxxxxxxxxx\\\"
-#DEFINES += GC_DROPBOX_CLIENT_SECRET=\\\"xxxxxxxxxxxxxxx\\\"
-
-# if you have your own MAPQUEST KEY
-#DEFINES += GC_MAPQUESTAPI_KEY=\\\"xxxxxxxxxxxxxxxxxxxxxx\\\"
-
-# USING THE WITHINGS API (http://oauth.withings.com/api)
-#DEFINES += GC_WITHINGS_CONSUMER_KEY=\\\"xxxxxxxxxxxxxxx\\\"
-#DEFINES += GC_WITHINGS_CONSUMER_SECRET=\\\"xxxxxxxxxxxxxxx\\\"
-
-option (USE_CloudDB "Enable if you want support for the GoldenCheetah/CloudDB feature (with a private CloudDB instance)" OFF)
-
-###======================================================
-### QT MODULES [we officially support QT4.8.6+ or QT5.8+]
-###======================================================
-
-# Prefer Qt 5 (require Qt 5.8?)
-option(USE_QT5 "Use Qt5 (instead of Qt4)." ON)
-
-if (USE_QT5)
-  find_package (Qt5Widgets 5.8 REQUIRED)
-  find_package (Qt5Core REQUIRED)
-  find_package (Qt5Xml REQUIRED)
-  find_package (Qt5Sql REQUIRED)
-  find_package (Qt5Network REQUIRED)
-  find_package (Qt5Svg REQUIRED)
-  find_package (Qt5Concurrent REQUIRED)
-  find_package (Qt5SerialPort REQUIRED)
-  find_package (Qt5MultimediaWidgets REQUIRED)
-  find_package (Qt5PrintSupport REQUIRED)
-
-  ## Always add debug information for Windows, MSVC
-  #win32-msvc* { CONFIG += force_debug_info }
-  
-  ## If building with QT5 there is experimental suport for building
-  ## with WebEngine now that WebKit is deprecated in QT 5.6
-  ## It brings in a LOT of dependencies !
-  if (NOWEBKIT AND Qt5Widgets_VERSION GREATER_EQUAL 5.6) # We require Qt >= 5.8 so we could skip the 2nd test here (?).
-    set (CMAKE_CXX_STANDARD 11)
-    find_package (Qt5WebEngine REQUIRED)
-    find_package (Qt5WebEngineCore REQUIRED)
-    find_package (Qt5WebEngineWidgets REQUIRED)
-    find_package (Qt5WebChannel REQUIRED)
-    find_package (Qt5Positioning REQUIRED)
-  else (NOWEBKIT AND Qt5Widgets_VERSION GREATER_EQUAL 5.6)
-    # On 5.5 or earlier we can still use WebKit
-    find_package (Qt5WebKitWidgets)
-  endif (NOWEBKIT AND Qt5Widgets_VERSION GREATER_EQUAL 5.6)
-  
-  if (APPLE)
-    ## need mac extras and clang++ needs to know which stdlib to link with
-    #QT += macextras webengine webenginecore webenginewidgets positioning
-  else (APPLE)
-    
-  endif (APPLE)
-  
-  set(CMAKE_AUTOMOC ON)
-  #set(CMAKE_AUTOUIC ON)
-  set(CMAKE_AUTORCC ON)
-
-  message (STATUS "Qt version: ${Qt5Widgets_VERSION}")
-
-  #add_definitions( -DUSE_QT5 ) 
-
-else (USE_QT5) # Qt 4
-  find_package (Qt4 REQUIRED)
-endif (USE_QT5)
 
 ###=======================================================================
 ### Directory Structure - Split into subdirs to be more manageable
@@ -257,14 +76,19 @@ endif (USE_QT5)
 
 set (GC_INCLUDE_DIRS
   src/ANT
-  src/Train
-  src/FileIO
-  src/Cloud
   src/Charts
-  src/Metrics
-  src/Gui
+  src/Cloud
   src/Core
+  src/FileIO
+  src/Gui
+  src/Metrics
   src/Planning
+  src/Python
+  src/R
+  src/Resources
+  src/Train
+  lmfit
+  levmar
   )
 
 ###=======================================================================
@@ -275,13 +99,12 @@ set (GC_INCLUDE_DIRS  ${GC_INCLUDE_DIRS} "qwt/src")
 set (GC_INCLUDE_DIRS  ${GC_INCLUDE_DIRS} "qxt/src")
 set (GC_INCLUDE_DIRS  ${GC_INCLUDE_DIRS} "qtsolutions/json")
 set (GC_INCLUDE_DIRS  ${GC_INCLUDE_DIRS} "qtsolutions/qwtcurve")
+set (GC_INCLUDE_DIRS  ${GC_INCLUDE_DIRS} "lmfit")
+set (GC_INCLUDE_DIRS  ${GC_INCLUDE_DIRS} "levmar")
 
 #
 # Qwt
 #
-
-# GC has its own Qwt
-#find_package (QWT REQUIRED)
 
 # We could 1) write a CMakeFile.txt for building the local (static) Qwt or 2) just add the sources to GC
 #
@@ -291,20 +114,6 @@ set (GC_INCLUDE_DIRS  ${GC_INCLUDE_DIRS} "qtsolutions/qwtcurve")
 # 2) Add Qwt sources
 file (GLOB_RECURSE QWT_HEADER_FILES RELATIVE ${CMAKE_SOURCE_DIR} qwt/src/*.h)
 file (GLOB_RECURSE QWT_SOURCE_FILES RELATIVE ${CMAKE_SOURCE_DIR} qwt/src/*.cpp)
-
-if (WIN32) 
-  # QWT is configured to build 2 libs (release/debug) on win32 (see qwtbuild.pri)
-  #CONFIG(release, debug|release){
-  #LIBS += -L$${PWD}/../qwt/lib -lqwt
-  #}
-  #CONFIG(debug, debug|release) {
-  #LIBS += -L$${PWD}/../qwt/lib -lqwtd
-  #}
-  
-else (WIN32)
-  # QWT is configured to build 1 lib for all other OS (see qwtbuild.pri)
-  # LIBS += -L$${PWD}/../qwt/lib -lqwt
-endif (WIN32)
 
 #
 # Qxt
@@ -329,86 +138,30 @@ set (GC_INCLUDE_DIRS ${GC_INCLUDE_DIRS} ${ZLIB_INCLUDE_DIRS})
 ### PLATFORM SPECIFIC DEPENDENCIES
 ###===============================
 
-# Microsoft Visual Studion toolchain dependencies
-if (MSVC)
-  # We need windows kit 8.2 or higher with MSVC, offer default location
-  #isEmpty(WINKIT_INSTALL) WINKIT_INSTALL= "C:/Program Files (x86)/Windows Kits/8.1/Lib/winv6.3/um/x64"
-  #LIBS += -L$${WINKIT_INSTALL} -lGdi32 -lUser32
-  
-else (MSVC)
-  # gnu toolchain wants math libs
-  #LIBS += -lm
-  
-  if (UNIX AND NOT APPLE)
-    # Linux gcc 5 grumbles about unused static globals and leads
-    # to a gazillion warnings that are harmless so lets remove them
-    #QMAKE_CXXFLAGS += -Wno-unused-variable
-    
-    # Linux Flex compiler grumbles about unsigned comparisons
-    #QMAKE_CXXFLAGS += -Wno-sign-compare
-  endif (UNIX AND NOT APPLE)
-  
-endif(MSVC)
+#
+# TODO move this to Windows.cmake Darwin.cmake, Linux.cmake etc.
+# For now we just support Linux
+#
 
-# Windows icon and use QT zlib, not sure why different but keep for now
-if (WIN32)
-  #RC_FILE = Resources/win32/windowsico.rc
-  #INCLUDEPATH += Resources/win32 $${QT_INSTALL_PREFIX}/src/3rdparty/zlib
-  #LIBS += -lws2_32
-else (WIN32)
-  #RC_FILE = Resources/images/gc.icns
-endif (WIN32)
+# Linux gcc 5 grumbles about unused static globals and leads
+# to a gazillion warnings that are harmless so lets remove them
+#QMAKE_CXXFLAGS += -Wno-unused-variable
 
-if (APPLE)
-  
-  # We have our own plist
-  set (QMAKE_INFO_PLIST ./Resources/mac/Info.plist.app)
-  
-  # on mac we use native buttons and video, but have native fullscreen support
-  #LIBS  += -lobjc -framework IOKit -framework AppKit
-  
-  # On mac we use QTKit or AV Foundation
-  if (GC_VIDEO_AV)
-    
-    # explicitly wants AV Foundation
-    #LIBS += -framework AVFoundation
-    #HEADERS +=  Gui/QtMacVideoWindow.h
-    #OBJECTIVE_SOURCES += Gui/QtMacVideoWindow.mm
-    
-  else (GC_VIDEO_AV)
-    
-    if (GC_VIDEO_NONE)
-      
-      # We have a blank videowindow, it will do nothing
-      #HEADERS += Train/VideoWindow.h
-      #SOURCES += Train/VideoWindow.cpp
-      
-    else (GC_VIDEO_NONE)
-      
-      # Default is to use QuickTime for now
-      #LIBS += -framework QTKit
-      #HEADERS +=  Gui/QtMacVideoWindow.h
-      #OBJECTIVE_SOURCES += Gui/QtMacVideoWindow.mm
-      
-    endif (GC_VIDEO_NONE)
-    
-  endif (GC_VIDEO_AV)
-  
-else (APPLE)
-  
-  # not on mac we need our own full screen support and segment control button
-  
-  set (GC_HEADER_FILES ${GC_HEADER_FILES}
-    src/Gui/QTFullScreen.h
-    src/Train/VideoWindow.h
-    )
-  
-  set (GC_SOURCE_FILES ${GC_SOURCE_FILES}
-    src/Gui/QTFullScreen.cpp
-    src/Train/VideoWindow.cpp    
-    )
-  
-endif (APPLE)
+# Linux Flex compiler grumbles about unsigned comparisons
+#QMAKE_CXXFLAGS += -Wno-sign-compare
+
+# TODO
+#RC_FILE = Resources/images/gc.icns
+
+set (GC_HEADER_FILES ${GC_HEADER_FILES}
+  src/Gui/QTFullScreen.h
+  src/Train/VideoWindow.h
+  )
+
+set (GC_SOURCE_FILES ${GC_SOURCE_FILES}
+  src/Gui/QTFullScreen.cpp
+  src/Train/VideoWindow.cpp
+  )
 
 #### these are no longer non-mac only
 set (GC_HEADER_FILES ${GC_HEADER_FILES}
@@ -423,23 +176,32 @@ set (GC_SOURCE_FILES ${GC_SOURCE_FILES}
 ### LANGUAGE SUPPORT
 ###=================
 
+# To compile translation you need QT tool - lrelease
+# If it is not found using he defaults in src/src.pro
+# then set the full path and filename here.
+#QMAKE_LRELEASE = /usr/bin/lrelease
+find_program (LRELEASE NAMES lrelease REQUIRED)
+if (LRELEASE)
+  message (STATUS "Using lrelease: ${LRELEASE}")
+endif (LRELEASE)
+
 find_package (Qt5LinguistTools REQUIRED)
 
-#set (GC_TS_FILES
-#  src/Resources/translations/gc_fr.ts
-#  src/Resources/translations/gc_ja.ts
-#  src/Resources/translations/gc_it.ts
-#  src/Resources/translations/gc_pt-br.ts
-#  src/Resources/translations/gc_de.ts
-#  src/Resources/translations/gc_cs.ts
-#  src/Resources/translations/gc_es.ts
-#  src/Resources/translations/gc_pt.ts
-#  src/Resources/translations/gc_ru.ts
-#  src/Resources/translations/gc_zh-cn.ts
-#  src/Resources/translations/gc_zh-tw.ts
-#  src/Resources/translations/gc_nl.ts
-#  src/Resources/translations/gc_sv.ts
-#  )
+# set (GC_TS_FILES
+#   src/Resources/translations/gc_fr.ts
+#   src/Resources/translations/gc_ja.ts
+#   src/Resources/translations/gc_it.ts
+#   src/Resources/translations/gc_pt-br.ts
+#   src/Resources/translations/gc_de.ts
+#   src/Resources/translations/gc_cs.ts
+#   src/Resources/translations/gc_es.ts
+#   src/Resources/translations/gc_pt.ts
+#   src/Resources/translations/gc_ru.ts
+#   src/Resources/translations/gc_zh-cn.ts
+#   src/Resources/translations/gc_zh-tw.ts
+#   src/Resources/translations/gc_nl.ts
+#   src/Resources/translations/gc_sv.ts
+#   )
 
 # This sort-of works but now we put generated files outside the build folder.
 #set_source_files_properties(${GC_TS_FILES} PROPERTIES OUTPUT_LOCATION ${CMAKE_CURRENT_BINARY_DIR}/../src/Resources/translations/)
@@ -448,22 +210,22 @@ find_package (Qt5LinguistTools REQUIRED)
 file (COPY "src/Resources" DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file (GLOB GC_TS_FILES "${CMAKE_CURRENT_BINARY_DIR}/Resources/translations/*.ts")
 set_source_files_properties(${GC_TS_FILES} PROPERTIES OUTPUT_LOCATION ${CMAKE_CURRENT_BINARY_DIR}/Resources/translations)
-  
+
 qt5_add_translation (GC_GM_FILES ${GC_TS_FILES})
 
 # Need lrelease to generate qm files
 #if (NOT LRELEASE)
-#  
+#
 #  if (WIN32)
 #    set (LRELEASE = ${QT_INSTALL_BINS}\\lrelease.exe)
 #  endif (WIN32)
-#  
+#
 #  if (UNIX AND NOT APPLE)
 #    set (LRELEASE  ${QT_INSTALL_BINS}/lrelease-qt4)
 #  else (UNIX AND NOT APPLE)
 #    set (LRELEASE  ${QT_INSTALL_BINS}/lrelease)
 #  endif (UNIX AND NOT APPLE)
-#  
+#
 #endif (NOT LRELEASE)
 
 # How to run lrelease
@@ -486,7 +248,7 @@ set (GC_RESOURCES
   ${CMAKE_CURRENT_BINARY_DIR}/Resources/application.qrc ${CMAKE_CURRENT_BINARY_DIR}/Resources/application.qrc
   )
 
-#set (GC_RESOURCES
+#set (GC_RESOURCES - deprecated
 #  ${GC_GM_FILES}
 #  src/Resources/application.qrc src/Resources/RideWindow.qrc
 #  )
@@ -498,32 +260,103 @@ set (GC_RESOURCES
 #                                                                             #
 ###############################################################################
 
-###========================================
-### OPTIONAL => LMFIT Model fitting library
-###========================================
+option (USE_PYTHON "Enable if you want Python charting / ML etc" OFF)
 
-# Not used yet.
+option (USE_R "Enable if you want an R chart" OFF)
 
-# We use LMFit for model fitting Banister models
-# download from http://apps.jcns.fz-juelich.de/src/lmfit/
-#LMFIT_INSTALL = /usr/local
+# uncomment below for R integration via webservices
+#HTPATH = ../httpserver
 
-# http://apps.jcns.fz-juelich.de/doku/sc/lmfit
-# http://apps.jcns.fz-juelich.de/src/lmfit/
+option (USE_SRMIO "Enable if you want SRM download support" OFF)
+if (USE_SRMIO)
+  option (DOWNLOAD_SRMIO "Enable if you want to download, build, and install the SRMIO lib." OFF)
+endif (USE_SRMIO)
 
-#if (USE_LMFIT) # TODO: Which version is required?
+option (USE_KQOAUTH "Enable if you want Twitter support" OFF)
 
-  #find_package (LMFIT)
-  
-  # we will work out the rest if you tell us where it is installed
-  #isEmpty(LMFIT_INCLUDE) { LMFIT_INCLUDE = $${LMFIT_INSTALL}/src }
-  #isEmpty(LMFIT_LIBS)    { LMFIT_LIBS    = -L$${LMFIT_INSTALL}/lib -llmfit }
-  
-  #INCLUDEPATH += $${LMFIT_INCLUDE}
-  #LIBS        += $${LMFIT_LIBS}
-  #DEFINES     += GC_HAVE_LMFIT
+# If you want support for Google Earth .kml files then you need
+# to install the Google libkml library
+#
+# http://code.google.com/p/libkml/
+# or on Linux sudo apt-get install libkml-dev
+#
+# then set the following variable appropriately
+# to the root of the libs/include path
+#KML_INSTALL = /usr/local
+#KML_INCLUDE =
+#KML_LIBS    =
+# Since KML also requires BOOST you will need to install
+# that too and then set BOOST_INCLUDE to that location
+# If the files are in /usr/include/boost then set
+#BOOST_INCLUDE = /usr/include
+#Additionally, on MAC the latest libs also need the following
+#QMAKE_CFLAGS_X86_64 += -mmacosx-version-min=10.7
+#QMAKE_CXXFLAGS_X86_64 = $$QMAKE_CFLAGS_X86_64
+#LIBS += -lexpat -luriparser -lminizip
 
-#endif (USE_LMFIT)
+option (USE_KML "Enable if you want support for Google Earth .kml files" OFF)
+
+option (USE_ICAL "Enable if you want support for downloading from iCal calendars" OFF)
+
+# If you want support for using USB1 sticks in Train View on Windows
+# then install the SiLabs USBXpress Software Development Kit (SDK)
+#     http://www.silabs.com/products/mcu/Pages/USBXpress.aspx
+# and set the following to the 'Host' directory within the SDK
+# USBXPRESS_INSTALL = /c/SiLabs/MCU/USBXpress/USBXpress_API/Host/
+# You may override the INCLUDE and LIB files if you like.
+# You *must* define USBXPRESS_INSTALL to use this feature.
+#USBXPRESS_INSTALL =
+#USBXPRESS_INCLUDE =
+#USBXPRESS_LIBS    =
+
+option (USE_USBXPRESS "Enable if you want support for using USB1 sticks in Train View on Windows" OFF)
+
+option (USE_LIBUSB "Enable if you want support for using USB2 sticks in Train View on Linux or Windows" OFF)
+
+option (USE_VLC "Enable if you want video playback on training mode" OFF)
+
+option (USE_SAMPLERATE "Enable if you want to resample with high fidelity" OFF)
+
+# If your system has PKG_CONFIG, QT can use this to get dependent libraries.
+# Add the names of libraries with PKG_CONFIG information.
+# eg. PKGCONFIG = oauth libical
+# Uncomment the following two lines to enable.
+#CONFIG   += link_pkgconfig
+#PKGCONFIG =
+
+option (USE_HTPATH "Enable if you want R integration via webservices" OFF)
+
+# Enable if you want a 'robot' to test realtime code without having
+# to get on your trainer and ride
+
+option (USE_ROBOT "Enable if you want 'robot' to test realtime code" OFF)
+
+if (USE_ROBOT)
+  add_definitions( -DGC_WANT_ROBOT )
+endif (USE_ROBOT)
+
+#if you have a version of mingw that properly provides
+#the Dwmapi.h header then uncomment this line
+#DEFINES += GC_HAVE_DWM
+
+# USING THE DROPBOX API
+# register your app at https://www.dropbox.com/developers/apps and
+# make sure the redirect_uri for the app includes  the url:
+# https://goldencheetah.github.io/blank.html and full permissions
+# are granted. Then set the client # and secret in the two defines
+# below replacing the xxxxxxxxxxxxxx with the actual values.
+#DEFINES += GC_DROPBOX_CLIENT_ID=\\\"xxxxxxxxxxxxxxx\\\"
+#DEFINES += GC_DROPBOX_CLIENT_SECRET=\\\"xxxxxxxxxxxxxxx\\\"
+
+# if you have your own MAPQUEST KEY
+#DEFINES += GC_MAPQUESTAPI_KEY=\\\"xxxxxxxxxxxxxxxxxxxxxx\\\"
+
+# USING THE WITHINGS API (http://oauth.withings.com/api)
+#DEFINES += GC_WITHINGS_CONSUMER_KEY=\\\"xxxxxxxxxxxxxxx\\\"
+#DEFINES += GC_WITHINGS_CONSUMER_SECRET=\\\"xxxxxxxxxxxxxxx\\\"
+
+option (USE_CloudDB "Enable if you want support for the GoldenCheetah/CloudDB feature (with a private CloudDB instance)" OFF)
+
 
 ###=========================
 ### OPTIONAL => Embed Python
@@ -532,61 +365,61 @@ set (GC_RESOURCES
 if (USE_PYTHON) # TODO: We also need NOWEBKIT=on here?
 
   find_package (PythonLibs 3.6 REQUIRED) # TODO: Is v 3.6 required?
-  
+
   find_package(PythonInterp REQUIRED)
   #ind_package (SIP 4.19 REQUIRED)
   find_package (SIP REQUIRED)
-  
+
   message (STATUS "Python libs:${PYTHON_LIBRARIES}")
   message (STATUS "Python include dir: ${PYTHON_INCLUDE_DIRS}")
   message (STATUS "Python lib version: ${PYTHONLIBS_VERSION_STRING}")
-  
-  message (STATUS "Using Python: ${PYTHON_EXECUTABLE}") 
+
+  message (STATUS "Using Python: ${PYTHON_EXECUTABLE}")
   message (STATUS "Python version: ${PYTHON_VERSION_STRING}")
   message (STATUS "SIP version: ${SIP_VERSION_STR}")
-  
-  if (Qt5Widgets_VERSION GREATER_EQUAL 5.8 AND SIP_VERSION_STR GREATER_EQUAL 4.19)
-    
+
+  if (Qt5Widgets_VERSION VERSION_GREATER_EQUAL 5.8 AND SIP_VERSION_STR VERSION_GREATER_EQUAL 4.19)
+
     # TODO: Do we really need to check for Qt 4.8+ on GC 3?
-    
+
     add_definitions( -DGC_WANT_PYTHON ) # TODO Is this one really needed?
     set (GC_INCLUDE_DIRS ${GC_INCLUDE_DIRS} "src/Python")
-    
+
     add_definitions( -DSIP_STATIC_MODULE )
     set (GC_OPT_INCLUDE_DIRS ${GC_OPT_INCLUDE_DIRS} ${PYTHON_INCLUDE_DIRS})
     set (GC_OPT_LIBS ${GC_OPT_LIBS} ${PYTHON_LIBRARIES})
-    
+
     ## Python integration
-    
+
     set (GC_HEADER_FILES ${GC_HEADER_FILES}
       src/Python/PythonEmbed.h src/Charts/PythonChart.h src/Python/PythonSyntax.h
       )
-    
+
     set (GC_SOURCE_FILES ${GC_SOURCE_FILES}
       src/Python/PythonEmbed.cpp src/Charts/PythonChart.cpp src/Python/PythonSyntax.cpp
       )
-    
+
     ## Python SIP generated module
-    
+
     set (GC_SOURCE_FILES ${GC_SOURCE_FILES}
       src/Python/SIP/sipgoldencheetahBindings.cpp src/Python/SIP/sipgoldencheetahcmodule.cpp
       src/Python/SIP/Bindings.cpp
       )
-    
+
     ## SIP type conversion
-    
+
     set (GC_SOURCE_FILES ${GC_SOURCE_FILES}
       src/Python/SIP/sipgoldencheetahQString.cpp
       src/Python/SIP/sipgoldencheetahPythonDataSeries.cpp
       )
-    
+
     add_definitions( -DGC_HAVE_PYTHON )
-    
-  else (Qt5Widgets_VERSION GREATER_EQUAL 5.8 AND SIP_VERSION_STR GREATER_EQUAL 4.19)
-    
+
+  else (Qt5Widgets_VERSION VERSION_GREATER_EQUAL 5.8 AND SIP_VERSION_STR VERSION_GREATER_EQUAL 4.19)
+
     message (STATUS "INFO: Embedded Python requires version QT >= 5.8 (no support for ${Qt5Widgets_VERSION}) and SIP 4.19+")
-    
-  endif(Qt5Widgets_VERSION GREATER_EQUAL 5.8 AND SIP_VERSION_STR GREATER_EQUAL 4.19)
+
+  endif(Qt5Widgets_VERSION VERSION_GREATER_EQUAL 5.8 AND SIP_VERSION_STR VERSION_GREATER_EQUAL 4.19)
 
 endif (USE_PYTHON)
 
@@ -599,59 +432,54 @@ if (USE_R)
   # Only supports Linux and OSX until RInside and Rcpp support MSVC
   # This is not likely to be very soon, they are heavily dependant on GCC
   # see: http://dirk.eddelbuettel.com/blog/2011/03/25/#rinside_and_qt
-  
+
   find_package (R REQUIRED)
   find_r_package (RInside REQUIRED)
-  #install_r_package (RInside)
+  #install_r_package (RIn side)
   find_r_package (Rcpp REQUIRED)
   #install_r_package (Rcpp)
-  
+
   if (R_EXEC)
-    
+
     add_definitions( -DGC_WANT_R )
 
     # Path to R.h
     execute_process(COMMAND ${R_EXEC} "RHOME" RESULT_VARIABLE R_RES OUTPUT_VARIABLE R_HOME OUTPUT_STRIP_TRAILING_WHITESPACE)
     message (STATUS "RHOME: ${R_HOME}")
     set (GC_OPT_INCLUDE_DIRS ${GC_OPT_INCLUDE_DIRS} ${R_HOME}/include)
-    
+
     # add R subdirectory to include path
     set (GC_OPT_INCLUDE_DIRS ${GC_OPT_INCLUDE_DIRS} "src/R")
-    
+
     ## include headers and libraries for R
-    if (WIN32)
-      #QMAKE_CXXFLAGS += -I$$R_HOME/include
-      #DEFINES += Win32
-    else (WIN32)
-      #QMAKE_CXXFLAGS += $$system($$R_HOME/bin/R CMD config --cppflags)
-    endif (WIN32)
-    
+    #QMAKE_CXXFLAGS += $$system($$R_HOME/bin/R CMD config --cppflags)
+
     ## R has lots of compatibility headers for S and legacy R code we don't want
     add_definitions( -DSTRICT_R_HEADERS )
-  
+
     ## R integration
     set (GC_HEADER_FILES ${GC_HEADER_FILES}
       src/R/REmbed.h src/R/RTool.h src/R/RGraphicsDevice.h src/R/RSyntax.h src/R/RLibrary.h
       )
-    
+
     set (GC_SOURCE_FILES ${GC_SOURCE_FILES}
       src/R/REmbed.cpp src/R/RTool.cpp src/R/RGraphicsDevice.cpp src/R/RSyntax.cpp src/R/RLibrary.cpp
       )
-    
+
     ## R based charts
     set (GC_HEADER_FILES ${GC_HEADER_FILES}
       src/Charts/RChart.h src/Charts/RCanvas.h
       )
-    
+
     set (GC_SOURCE_FILES ${GC_SOURCE_FILES}
       src/Charts/RChart.cpp src/Charts/RCanvas.cpp
       )
 
     ## For hardware accelerated scene rendering
     find_package(Qt5OpenGL)
-    
+
   endif (R_EXEC)
-  
+
 endif (USE_R)
 
 ###====================
@@ -659,13 +487,13 @@ endif (USE_R)
 ###====================
 
 if (USE_KQOAUTH)
-  
+
   find_package (KQOAUTH REQUIRED) # TODO check for version>=0.98
   add_definitions( -DGC_HAVE_KQOAUTH )
-  
+
   set (GC_OPT_INCLUDE_DIRS ${GC_OPT_INCLUDE_DIRS} ${KQOAUTH_INCLUDE_DIR})
   set (GC_OPT_LIBS ${GC_OPT_LIBS} ${KQOAUTH_LIBRARIES})
-  
+
 endif (USE_KQOAUTH)
 
 ###=======================================================
@@ -675,13 +503,13 @@ endif (USE_KQOAUTH)
 if (USE_D2XX)
 
   #find_package (D2XX)
-  
+
   #DEFINES     += GC_HAVE_D2XX
   #INCLUDEPATH += $${D2XX_INCLUDE}
 
   #!isEmpty(D2XX_LIBS) { LIBS += $${D2XX_LIBS} }
   #unix                { LIBS += -ldl }
-  
+
   #HEADERS     += FileIO/D2XX.h
   #SOURCES     += FileIO/D2XX.cpp
 
@@ -696,28 +524,28 @@ endif (USE_D2XX)
 # https://github.com/rclasen/srmio
 
 if (USE_SRMIO)
-  
+
   # Download, build, and install the SRMIO lib. You will be asked for the root
   # password by sudo to install the lib.
   if (DOWNLOAD_SRMIO)
     add_subdirectory(${CMAKE_SOURCE_DIR}/cmake/external/srmio srmio_build)
   endif (DOWNLOAD_SRMIO)
-  
+
   find_package (SRMIO REQUIRED)
-  
+
   set (GC_OPT_INCLUDE_DIRS ${GC_OPT_INCLUDE_DIRS} ${LIBSRMIO_INCLUDE_DIR})
   set (GC_OPT_LIBS ${GC_OPT_LIBS} ${LIBSRMIO_LIBRARIES})
-  
+
   add_definitions( -DGC_HAVE_SRMIO )
-  
+
   set (GC_HEADER_FILES ${GC_HEADER_FILES}
     src/FileIO/SrmDevice.h
     )
-  
+
   set (GC_SOURCE_FILES ${GC_SOURCE_FILES}
     src/FileIO/SrmDevice.cpp
     )
-  
+
 endif (USE_SRMIO)
 
 
@@ -730,25 +558,25 @@ endif (USE_SRMIO)
 # https://github.com/google/libkml
 
 if (USE_KML)
-  
+
   # we will work out the rest if you tell use where it is installed
   #isEmpty(KML_INCLUDE) { KML_INCLUDE = $${KML_INSTALL}/include }
   #isEmpty(KML_LIBS)    { KML_LIBS    = -L$${KML_INSTALL}/lib/ \
   #                                     -lkmldom -lkmlconvenience -lkmlengine -lkmlbase
   #}
-  
+
   # on MS VS the linker wants /LTCG for libkmldom due to
   # "MSIL .netmodule or module compiled with /GL found"
   #win32-msvc* { QMAKE_LFLAGS +=  /LTCG }
-  
+
   #DEFINES     += GC_HAVE_KML
   #INCLUDEPATH += $${KML_INCLUDE}  $${BOOST_INCLUDE}
   #LIBS        += $${KML_LIBS}
-  
+
   # add kml file i/o
   #SOURCES     += FileIO/KmlRideFile.cpp
   #HEADERS     += FileIO/KmlRideFile.h
-  
+
 endif (USE_KML)
 
 ###=================
@@ -762,17 +590,17 @@ if (USE_ICAL)
 
   set (GC_OPT_INCLUDE_DIRS ${GC_OPT_INCLUDE_DIRS} ${LIBICAL_INCLUDE_DIR})
   set (GC_OPT_LIBS ${GC_OPT_LIBS} ${LIBICAL_LIBRARIES})
-  
+
   # add caldav and diary functions
 
   set (GC_HEADER_FILES ${GC_HEADER_FILES}
     src/Core/ICalendar.h src/Charts/DiaryWindow.h src/Cloud/CalDAV.h
     )
-  
+
   set (GC_SOURCE_FILES ${GC_SOURCE_FILES}
     src/Core/ICalendar.cpp src/Charts/DiaryWindow.cpp src/Cloud/CalDAV.cpp
     )
-  
+
 endif (USE_ICAL)
 
 ###===================
@@ -786,28 +614,28 @@ if (USE_LIBUSB)
 
   set (GC_OPT_INCLUDE_DIRS ${GC_OPT_INCLUDE_DIRS} ${LIBUSB_INCLUDE_DIR})
   set (GC_OPT_LIBS ${GC_OPT_LIBS} ${LIBUSB_LIBRARIES})
-  
+
   set (GC_HEADER_FILES ${GC_HEADER_FILES}
     src/Train/LibUsb.h src/Train/EzUsb.h src/Train/Fortius.cpp src/Train/FortiusController.h
     src/Train/Imagic.h src/Train/ImagicController.h
     )
-  
+
   set (GC_SOURCE_FILES ${GC_SOURCE_FILES}
-    src/Train/LibUsb.cpp src/Train/EzUsb.c src/Train/Fortius.cpp src/Train/FortiusController.cpp 
+    src/Train/LibUsb.cpp src/Train/EzUsb.c src/Train/Fortius.cpp src/Train/FortiusController.cpp
     src/Train/Imagic.cpp src/Train/ImagicController.cpp
     )
-  
+
 endif (USE_LIBUSB)
 
 ###===================================================
 ### OPTIONAL => USBXPRESS [Windows only for ANT+ USB1]
 ###===================================================
 
-if (WIN32) 
-  
+if (WIN32)
+
   # are we supporting USB1 devices on Windows?
   if (USE_USBXPRESS)
-    
+
     # we will work out the rest if you tell use where it is installed
     #isEmpty(USBXPRESS_INCLUDE) { USBXPRESS_INCLUDE = $${USBXPRESS_INSTALL} }
 
@@ -831,7 +659,7 @@ endif (WIN32)
 
 # if you want video playback on training mode then
 # download and install vlc (videolan) from
-# ftp.videolan.org/pub/vlc/1.1.8 or http://download.videolan.org/vlc/ for 
+# ftp.videolan.org/pub/vlc/1.1.8 or http://download.videolan.org/vlc/ for
 # your platform there are sdks for Mac and Windows. On Linux you
 # will need to use the latest distro (e.g. Meerkat
 # on Ubuntu) to be sure apt-get installs the latest
@@ -840,16 +668,16 @@ endif (WIN32)
 # If the are installed in /usr/local/vlc then set
 # VLC_INSTALL = /usr/local/vlc
 # This will automatically set (Windows and Unix):
-# VLC_INCLUDE = $${VLC_INSTALL}/include 
+# VLC_INCLUDE = $${VLC_INSTALL}/include
 # For Windows
 # VLC_LIBS    = $${VLC_INSTALL}/lib/libvlc.dll.a
 # For Unix
 # VLC_LIBS    = -lvlc
 # You may override the INCLUDE and LIB files if you like.
 # You *must* define VLC_INSTALL to use this feature.
-#VLC_INSTALL = 
-#VLC_INCLUDE = 
-#VLC_LIBS    = 
+#VLC_INSTALL =
+#VLC_INCLUDE =
+#VLC_LIBS    =
 
 # *** Mac users NOTE ***
 # On MAC you don't need libvlc since we use the
@@ -865,18 +693,18 @@ endif (WIN32)
 #DEFINES += GC_VIDEO_AV               # use AV Foundation on Mac now QTKit is deprecated
 
 if (USE_VLC)
-  
+
   # not on a mac as they use quicktime video
   if (NOT APPLE)
-    
+
     find_package (LIBVLC)
     add_definitions ( -DGC_HAVE_VLC )
-    
+
     set (GC_OPT_INCLUDE_DIRS ${GC_OPT_INCLUDE_DIRS} ${LIBVLC_INCLUDE_DIR})
     set (GC_OPT_LIBS ${GC_OPT_LIBS} ${LIBVLC_LIBRARIES})
-    
+
   endif (NOT APPLE)
-  
+
 endif (USE_VLC)
 
 ###=======================
@@ -884,17 +712,17 @@ endif (USE_VLC)
 ###=======================
 
 # Mainly tested on Linux, compilation on Windows requires
-# some modifications in the build process to build with MSVC2015 
+# some modifications in the build process to build with MSVC2015
 # Code is available at: http://www.mega-nerd.com/SRC/
 
 if (USE_SAMPLERATE)
-  
+
   find_package (LIBSAMPLERATE REQUIRED)
   add_definitions ( -DGC_HAVE_SAMPLERATE )
-  
+
   set (GC_OPT_INCLUDE_DIRS ${GC_OPT_INCLUDE_DIRS} ${LIBSAMPLERATE_INCLUDE_DIR})
   set (GC_OPT_LIBS ${GC_OPT_LIBS} ${LIBSAMPLERATE_LIBRARIES})
-  
+
 endif (USE_SAMPLERATE)
 
 ###==================================
@@ -921,7 +749,7 @@ if (USE_HTPATH)
     httpserver/httpsessionstore.h
     httpserver/staticfilecontroller.h
     )
-  
+
   set (GC_SOURCE_FILES ${GC_SOURCE_FILES}
     src/Core/APIWebService.cpp
     httpserver/httpglobal.cpp
@@ -936,7 +764,7 @@ if (USE_HTPATH)
     httpserver/httpsessionstore.cpp
     httpserver/staticfilecontroller.cpp
     )
-  
+
 endif (USE_HTPATH)
 
 ###=====================================================
@@ -953,32 +781,32 @@ endif (USE_HTPATH)
 
 if (USE_CloudDB)
 
-  if (Qt5Widgets_VERSION GREATER_EQUAL 5.5)
+  if (Qt5Widgets_VERSION VERSION_GREATER_EQUAL 5.5)
 
     #DEFINES +=GC_CLOUD_DB_BASIC_AUTH=
     #DEFINES +=GC_CLOUD_DB_APP_NAME=
-    
+
     set (GC_HEADER_FILES ${GC_HEADER_FILES}
       src/Cloud/CloudDBChart.h src/Cloud/CloudDBCommon.h
       src/Cloud/CloudDBCurator.h src/Cloud/CloudDBStatus.h
       src/Cloud/CloudDBVersion.h src/Cloud/CloudDBTelemetry.h
       )
-    
+
     set (GC_SOURCE_FILES ${GC_SOURCE_FILES}
       src/Cloud/CloudDBChart.cpp src/Cloud/CloudDBCommon.cpp
       src/Cloud/CloudDBCurator.cpp src/Cloud/CloudDBStatus.cpp
-      src/Cloud/CloudDBVersion.cpp src/Cloud/CloudDBTelemetry.cpp      
+      src/Cloud/CloudDBVersion.cpp src/Cloud/CloudDBTelemetry.cpp
       )
 
     add_definitions ( -DGC_HAS_CLOUD_DB )
-    
-  else (Qt5Widgets_VERSION GREATER_EQUAL 5.5)
-    
+
+  else (Qt5Widgets_VERSION VERSION_GREATER_EQUAL 5.5)
+
     # QT5 but not 5.5 or higher
     message(STATUS "INFO: CloudDB requires version QT >= 5.5, no support for ${Qt5Widgets_VERSION}")
-    
-  endif (Qt5Widgets_VERSION GREATER_EQUAL 5.5)
-  
+
+  endif (Qt5Widgets_VERSION VERSION_GREATER_EQUAL 5.5)
+
 endif (USE_CloudDB)
 
 ###############################################################################
@@ -992,92 +820,113 @@ endif (USE_CloudDB)
 ### FEATURES ENABLED WHEN HAVE QT5 [or higher]
 ###===========================================
 
-if (Qt5Widgets_VERSION GREATER_EQUAL 5) 
-  
+if (Qt5Widgets_VERSION VERSION_GREATER_EQUAL 5)
+
   # Features that only work with QT5 or higher
-  
+
   set (GC_HEADER_FILES ${GC_HEADER_FILES}
     src/Cloud/Dropbox.h
     src/Cloud/GoogleDrive.h src/Cloud/KentUniversity.h
     src/Cloud/OpenData.h
     )
-  
+
   set (GC_SOURCE_FILES ${GC_SOURCE_FILES}
     src/Cloud/Dropbox.cpp
     src/Cloud/GoogleDrive.cpp src/Cloud/KentUniversity.cpp
     src/Cloud/OpenData.cpp
     )
 
-  if (Qt5Widgets_VERSION GREATER_EQUAL 5.4) 
-    
+  if (Qt5Widgets_VERSION VERSION_GREATER_EQUAL 5.4)
+
     set (GC_HEADER_FILES ${GC_HEADER_FILES}
       src/Cloud/SixCycle.h
       src/Cloud/PolarFlow.h
       src/Cloud/SportTracks.h
       src/Cloud/TodaysPlan.h
       )
-    
+
     set (GC_SOURCE_FILES ${GC_SOURCE_FILES}
       src/Cloud/SixCycle.cpp
       src/Cloud/PolarFlow.cpp
       src/Cloud/SportTracks.cpp
       src/Cloud/TodaysPlan.cpp
       )
-    
-  endif (Qt5Widgets_VERSION GREATER_EQUAL 5.4) 
+
+  endif (Qt5Widgets_VERSION VERSION_GREATER_EQUAL 5.4)
 
   set (GC_HEADER_FILES ${GC_HEADER_FILES}
     src/Train/MonarkController.h src/Train/MonarkConnection.h
-    src/Train/Kettler.h src/Train/KettlerController.h src/Train/KettlerConnection.h  
+    src/Train/Kettler.h src/Train/KettlerController.h src/Train/KettlerConnection.h
     src/Train/KettlerRacer.h src/Train/KettlerRacerController.h src/Train/KettlerRacerConnection.h
+    src/Train/Ergofit.h src/Train/ErgofitController.h src/Train/ErgofitConnection.h
+    src/Train/DaumController.h src/Train/Daum.h
     )
 
   set (GC_SOURCE_FILES ${GC_SOURCE_FILES}
     src/Train/MonarkController.cpp src/Train/MonarkConnection.cpp
     src/Train/Kettler.cpp src/Train/KettlerController.cpp src/Train/KettlerConnection.cpp
     src/Train/KettlerRacer.cpp src/Train/KettlerRacerController.cpp src/Train/KettlerRacerConnection.cpp
+    src/Train/Ergofit.cpp src/Train/ErgofitController.cpp src/Train/ErgofitConnection.cpp
+    src/Train/DaumController.cpp src/Train/Daum.cpp
     )
-  
-  # bluetooth in QT5.5 or higher (5.4 was only a tech preview)
-  if (Qt5Widgets_VERSION GREATER_EQUAL 5.5) 
 
-    #greaterThan(QT_MINOR_VERSION, 4) {
+  # bluetooth in QT5.5 or higher (5.4 was only a tech preview)
+  if (Qt5Widgets_VERSION VERSION_GREATER_EQUAL 5.5)
+
     #QT += bluetooth
     find_package (Qt5Bluetooth REQUIRED)
 
     set (GC_HEADER_FILES ${GC_HEADER_FILES}
       src/Train/BT40Controller.h src/Train/BT40Device.h
+      src/Train/VMProConfigurator.h src/Train/VMProWidget.h
       )
 
     set (GC_SOURCE_FILES ${GC_SOURCE_FILES}
       src/Train/BT40Controller.cpp src/Train/BT40Device.cpp
+      src/Train/VMProConfigurator.cpp src/Train/VMProWidget.cpp
       )
-    
-  endif (Qt5Widgets_VERSION GREATER_EQUAL 5.5) 
-  
+
+  endif (Qt5Widgets_VERSION VERSION_GREATER_EQUAL 5.5)
+
   # qt charts is officially supported from QT5.8 or higher
   # in 5.7 it is a tech preview and not always available
-  
-  if (Qt5Widgets_VERSION GREATER_EQUAL 5.8) 
+
+  if (Qt5Widgets_VERSION VERSION_GREATER_EQUAL 5.8)
 
     # Dashboard uses qt charts, so needs at least Qt 5.7
-    
+
     find_package(Qt5Charts REQUIRED)
     find_package(Qt5OpenGL REQUIRED)
-    
-    #add_definitions( -DGC_HAVE_OVERVIEW )
-    
-    #set (GC_HEADER_FILES ${GC_HEADER_FILES}
-    #  src/Charts/OverviewWindow.h
-    #  )
-    
-    #set (GC_SOURCE_FILES ${GC_SOURCE_FILES}
-    #  src/Charts/OverviewWindow.cpp
-    #  )	  
-    
-  endif (Qt5Widgets_VERSION GREATER_EQUAL 5.8) 
-  
-endif(Qt5Widgets_VERSION GREATER_EQUAL 5) 
+
+    add_definitions( -DGC_HAVE_OVERVIEW )
+
+    # Dashboard uses qt charts, so needs at least Qt 5.7
+
+    set (GC_HEADER_FILES ${GC_HEADER_FILES}
+      src/Gui/ChartSpace.h src/Charts/OverviewItems.h src/Charts/Overview.h
+      )
+
+    set (GC_SOURCE_FILES ${GC_SOURCE_FILES}
+      src/Gui/ChartSpace.cpp src/Charts/OverviewItems.cpp src/Charts/Overview.cpp
+      )
+
+    # generic chart
+
+    add_definitions( -DGC_HAVE_GENERIC )
+
+    set (GC_HEADER_FILES ${GC_HEADER_FILES}
+      src/Charts/UserChart.h src/Charts/UserChartData.h src/Charts/GenericChart.h
+      src/Charts/GenericPlot.h src/Charts/GenericSelectTool.h src/Charts/GenericLegend.h
+      )
+
+    set (GC_SOURCE_FILES ${GC_SOURCE_FILES}
+      src/Charts/UserChart.cpp src/Charts/UserChartData.cpp src/Charts/GenericChart.cpp
+      src/Charts/GenericPlot.cpp src/Charts/GenericSelectTool.cpp src/Charts/GenericLegend.cpp
+      )
+
+  endif (Qt5Widgets_VERSION VERSION_GREATER_EQUAL 5.8)
+
+endif(Qt5Widgets_VERSION VERSION_GREATER_EQUAL 5)
 
 ###=====================
 ### LEX AND YACC SOURCES
@@ -1155,20 +1004,13 @@ set (GC_HEADER_FILES ${GC_HEADER_FILES}
   src/Charts/TreeMapWindow.h src/Charts/ZoneScaleDraw.h
   )
 
-# RideWindow temporarily disabled if we don't have WebKit
-if (NOT NOWEBKIT)
-  set (GC_HEADER_FILES ${GC_HEADER_FILES}
-    src/Charts/RideWindow.h
-    )
-endif (NOT NOWEBKIT)
-
 # cloud services
 set (GC_HEADER_FILES ${GC_HEADER_FILES}
-  src/Cloud/BodyMeasuresDownload.h src/Cloud/CalendarDownload.h src/Cloud/CloudService.h src/Cloud/LocalFileStore.h
-  src/Cloud/OAuthDialog.h src/Cloud/OAuthManager.h src/Cloud/TodaysPlanBodyMeasures.h src/Cloud/WithingsDownload.h
-  src/Cloud/Strava.h src/Cloud/CyclingAnalytics.h src/Cloud/RideWithGPS.h src/Cloud/TrainingsTageBuch.h
-  src/Cloud/Selfloops.h src/Cloud/Velohero.h src/Cloud/SportsPlusHealth.h src/Cloud/AddCloudWizard.h
-  src/Cloud/Withings.h src/Cloud/HrvMeasuresDownload.h src/Cloud/Xert.h
+  src/Cloud/BodyMeasuresDownload.h src/Cloud/CalendarDownload.h src/Cloud/CloudService.h
+  src/Cloud/LocalFileStore.h src/Cloud/OAuthDialog.h src/Cloud/TodaysPlanBodyMeasures.h
+  src/Cloud/WithingsDownload.h src/Cloud/Strava.h src/Cloud/CyclingAnalytics.h src/Cloud/RideWithGPS.h
+  src/Cloud/TrainingsTageBuch.h src/Cloud/Selfloops.h src/Cloud/Velohero.h src/Cloud/SportsPlusHealth.h
+  src/Cloud/AddCloudWizard.h src/Cloud/Withings.h src/Cloud/HrvMeasuresDownload.h src/Cloud/Xert.h
   )
 
 # core data
@@ -1177,7 +1019,8 @@ set (GC_HEADER_FILES ${GC_HEADER_FILES}
   src/Core/IdleTimer.h src/Core/IntervalItem.h src/Core/NamedSearch.h src/Core/RideCache.h src/Core/RideCacheModel.h src/Core/RideDB.h
   src/Core/RideItem.h src/Core/Route.h src/Core/RouteParser.h src/Core/Season.h src/Core/SeasonParser.h src/Core/Secrets.h src/Core/Settings.h
   src/Core/Specification.h src/Core/TimeUtils.h src/Core/Units.h src/Core/UserData.h src/Core/Utils.h
-  src/Core/Measures.h src/Core/BodyMeasures.h src/Core/HrvMeasures.h
+  src/Core/Measures.h src/Core/BodyMeasures.h src/Core/HrvMeasures.h src/Core/BlinnSolver.h src/Core/Quadtree.h
+
   )
 
 # device and file IO or edit
@@ -1194,26 +1037,27 @@ set (GC_HEADER_FILES ${GC_HEADER_FILES}
   src/FileIO/SlfParser.h src/FileIO/SlfRideFile.h src/FileIO/SmfParser.h src/FileIO/SmfRideFile.h src/FileIO/SmlParser.h
   src/FileIO/SmlRideFile.h src/FileIO/SrdRideFile.h src/FileIO/SrmRideFile.h src/FileIO/SyncRideFile.h src/FileIO/TcxParser.h
   src/FileIO/TcxRideFile.h src/FileIO/TxtRideFile.h src/FileIO/WkoRideFile.h src/FileIO/XDataDialog.h src/FileIO/XDataTableModel.h
-  src/FileIO/FilterHRV.h src/FileIO/HrvMeasuresCsvImport.h
+  src/FileIO/FilterHRV.h src/FileIO/HrvMeasuresCsvImport.h src/FileIO/LocationInterpolation.h src/FileIO/TTSReader.h
   )
 
 # GUI components
 set (GC_HEADER_FILES ${GC_HEADER_FILES}
   src/Gui/AboutDialog.h src/Gui/AddIntervalDialog.h src/Gui/AnalysisSidebar.h src/Gui/ChooseCyclistDialog.h src/Gui/ColorButton.h
   src/Gui/Colors.h src/Gui/CompareDateRange.h src/Gui/CompareInterval.h src/Gui/ComparePane.h src/Gui/ConfigDialog.h src/Gui/DiarySidebar.h
-  src/Gui/DragBar.h src/Gui/EstimateCPDialog.h src/Gui/GcCrashDialog.h src/Gui/GcScopeBar.h src/Gui/GcSideBarItem.h src/Gui/GcToolBar.h src/Gui/GcWindowLayout.h
+  src/Gui/DragBar.h src/Gui/EstimateCPDialog.h src/Gui/GcCrashDialog.h src/Gui/GcSideBarItem.h src/Gui/GcToolBar.h src/Gui/GcWindowLayout.h
   src/Gui/GcWindowRegistry.h src/Gui/GenerateHeatMapDialog.h src/Gui/GProgressDialog.h src/Gui/HelpWhatsThis.h src/Gui/HelpWindow.h
   src/Gui/IntervalTreeView.h src/Gui/LTMSidebar.h src/Gui/MainWindow.h src/Gui/NewCyclistDialog.h src/Gui/Pages.h src/Gui/RideNavigator.h src/Gui/RideNavigatorProxy.h
   src/Gui/SaveDialogs.h src/Gui/SearchBox.h src/Gui/SearchFilterBox.h src/Gui/SolveCPDialog.h src/Gui/Tab.h src/Gui/TabView.h src/Gui/ToolsRhoEstimator.h
-  src/Gui/Views.h src/Gui/BatchExportDialog.h src/Gui/DownloadRideDialog.h src/Gui/ManualRideDialog.h
-  src/Gui/MergeActivityWizard.h src/Gui/RideImportWizard.h src/Gui/SplitActivityWizard.h src/Gui/SolverDisplay.h
+  src/Gui/Views.h src/Gui/BatchExportDialog.h src/Gui/DownloadRideDialog.h src/Gui/ManualRideDialog.h src/Gui/NewMainWindow.h src/Gui/NewSideBar.h
+  src/Gui/MergeActivityWizard.h src/Gui/RideImportWizard.h src/Gui/SplitActivityWizard.h src/Gui/SolverDisplay.h src/Gui/MetricSelect.h
+  src/Gui/AddChartWizard.h
   )
 
 # metrics and models
 set (GC_HEADER_FILES ${GC_HEADER_FILES}
-  src/Metrics/CPSolver.h src/Metrics/Estimator.h src/Metrics/ExtendedCriticalPower.h src/Metrics/HrZones.h src/Metrics/PaceZones.h src/Metrics/PDModel.h
-  src/Metrics/PMCData.h src/Metrics/RideMetadata.h src/Metrics/RideMetric.h src/Metrics/SpecialFields.h src/Metrics/Statistic.h
-  src/Metrics/UserMetricParser.h src/Metrics/UserMetricSettings.h src/Metrics/VDOTCalculator.h src/Metrics/WPrime.h src/Metrics/Zones.h
+  src/Metrics/Banister.h src/Metrics/CPSolver.h src/Metrics/Estimator.h src/Metrics/ExtendedCriticalPower.h src/Metrics/HrZones.h src/Metrics/PaceZones.h
+  src/Metrics/PDModel.h src/Metrics/PMCData.h src/Metrics/PowerProfile.h src/Metrics/RideMetadata.h src/Metrics/RideMetric.h src/Metrics/SpecialFields.h
+  src/Metrics/Statistic.h src/Metrics/UserMetricParser.h src/Metrics/UserMetricSettings.h src/Metrics/VDOTCalculator.h src/Metrics/WPrime.h src/Metrics/Zones.h
   )
 
 ## Planning and Compliance
@@ -1225,7 +1069,8 @@ set (GC_HEADER_FILES ${GC_HEADER_FILES}
 set (GC_HEADER_FILES ${GC_HEADER_FILES}
   qtsolutions/codeeditor/codeeditor.h qtsolutions/json/mvjson.h qtsolutions/qwtcurve/qwt_plot_gapped_curve.h
   qxt/src/qxtspanslider.h qxt/src/qxtspanslider_p.h qxt/src/qxtstringspinbox.h qzip/zipreader.h
-  qzip/zipwriter.h
+  qzip/zipwriter.h lmfit/lmcurve.h  lmfit/lmcurve_tyd.h  lmfit/lmmin.h  lmfit/lmstruct.h
+  levmar/compiler.h  levmar/levmar.h  levmar/lm.h  levmar/misc.h
   )
 
 # Train View
@@ -1234,19 +1079,18 @@ set (GC_HEADER_FILES ${GC_HEADER_FILES}
   src/Train/DeviceTypes.h src/Train/DialWindow.h src/Train/ErgDBDownloadDialog.h src/Train/ErgDB.h src/Train/ErgFile.h src/Train/ErgFilePlot.h
   src/Train/Library.h src/Train/LibraryParser.h src/Train/MeterWidget.h src/Train/NullController.h src/Train/RealtimeController.h
   src/Train/RealtimeData.h src/Train/RealtimePlot.h src/Train/RealtimePlotWindow.h src/Train/RemoteControl.h src/Train/SpinScanPlot.h
-  src/Train/SpinScanPlotWindow.h src/Train/SpinScanPolarPlot.h src/Train/GarminServiceHelper.h
+  src/Train/SpinScanPlotWindow.h src/Train/SpinScanPolarPlot.h src/Train/GarminServiceHelper.h src/Train/PhysicsUtility.h src/Train/BicycleSim.h
   )
 
-if (USE_QT5)
-  set (GC_HEADER_FILES ${GC_HEADER_FILES}
-
-    )
-endif (USE_QT5)
+set (GC_HEADER_FILES ${GC_HEADER_FILES} # Qt 5
+  src/Train/TodaysPlanWorkoutDownload.h
+  )
 
 set (GC_HEADER_FILES ${GC_HEADER_FILES}
   src/Train/TrainBottom.h src/Train/TrainDB.h src/Train/TrainSidebar.h
-  src/Train/VideoLayoutParser.h src/Train/VideoSyncFile.h src/Train/WorkoutPlotWindow.h src/Train/WebPageWindow.h 
+  src/Train/VideoLayoutParser.h src/Train/VideoSyncFile.h src/Train/WorkoutPlotWindow.h src/Train/WebPageWindow.h
   src/Train/WorkoutWidget.h src/Train/WorkoutWidgetItems.h src/Train/WorkoutWindow.h src/Train/WorkoutWizard.h src/Train/ZwoParser.h
+
   )
 
 ###=============
@@ -1273,37 +1117,31 @@ set (GC_SOURCE_FILES ${GC_SOURCE_FILES}
   src/Charts/TreeMapWindow.cpp
   )
 
-# RideWindow temporarily disabled if we don't have WebKit
-if (NOT NOWEBKIT)
-  set (GC_SOURCE_FILES ${GC_SOURCE_FILES}
-    src/Charts/RideWindow.cpp
-    )
-endif (NOT NOWEBKIT)
-    
 ## Cloud Services / Web resources
 set (GC_SOURCE_FILES ${GC_SOURCE_FILES}
-  src/Cloud/BodyMeasuresDownload.cpp src/Cloud/CalendarDownload.cpp src/Cloud/CloudService.cpp src/Cloud/LocalFileStore.cpp
-  src/Cloud/OAuthDialog.cpp src/Cloud/OAuthManager.cpp src/Cloud/TodaysPlanBodyMeasures.cpp src/Cloud/WithingsDownload.cpp
-  src/Cloud/Strava.cpp src/Cloud/CyclingAnalytics.cpp src/Cloud/RideWithGPS.cpp src/Cloud/TrainingsTageBuch.cpp
-  src/Cloud/Selfloops.cpp src/Cloud/Velohero.cpp src/Cloud/SportsPlusHealth.cpp src/Cloud/AddCloudWizard.cpp
-  src/Cloud/Withings.cpp src/Cloud/HrvMeasuresDownload.cpp src/Cloud/Xert.cpp
+  src/Cloud/BodyMeasuresDownload.cpp src/Cloud/CalendarDownload.cpp src/Cloud/CloudService.cpp
+  src/Cloud/LocalFileStore.cpp src/Cloud/OAuthDialog.cpp src/Cloud/TodaysPlanBodyMeasures.cpp
+  src/Cloud/WithingsDownload.cpp src/Cloud/Strava.cpp src/Cloud/CyclingAnalytics.cpp src/Cloud/RideWithGPS.cpp
+  src/Cloud/TrainingsTageBuch.cpp src/Cloud/Selfloops.cpp src/Cloud/Velohero.cpp src/Cloud/SportsPlusHealth.cpp
+  src/Cloud/AddCloudWizard.cpp src/Cloud/Withings.cpp src/Cloud/HrvMeasuresDownload.cpp src/Cloud/Xert.cpp
   )
 
 ## Core Data Structures
-set (GC_SOURCE_FILES ${GC_SOURCE_FILES}	   
+set (GC_SOURCE_FILES ${GC_SOURCE_FILES}
   src/Core/Athlete.cpp src/Core/Context.cpp src/Core/DataFilter.cpp src/Core/FreeSearch.cpp src/Core/GcUpgrade.cpp src/Core/IdleTimer.cpp
   src/Core/IntervalItem.cpp src/Core/main.cpp src/Core/NamedSearch.cpp src/Core/RideCache.cpp src/Core/RideCacheModel.cpp src/Core/RideItem.cpp
   src/Core/Route.cpp src/Core/RouteParser.cpp src/Core/Season.cpp src/Core/SeasonParser.cpp src/Core/Settings.cpp src/Core/Specification.cpp
   src/Core/TimeUtils.cpp src/Core/Units.cpp src/Core/UserData.cpp src/Core/Utils.cpp
-  src/Core/Measures.cpp src/Core/BodyMeasures.cpp src/Core/HrvMeasures.cpp
+  src/Core/Measures.cpp src/Core/BodyMeasures.cpp src/Core/HrvMeasures.cpp src/Core/BlinnSolver.cpp src/Core/Quadtree.cpp
+
   )
 
 ## File and Device IO and Editing
-set (GC_SOURCE_FILES ${GC_SOURCE_FILES}	 
+set (GC_SOURCE_FILES ${GC_SOURCE_FILES}
   src/FileIO/ArchiveFile.cpp src/FileIO/AthleteBackup.cpp src/FileIO/Bin2RideFile.cpp src/FileIO/BinRideFile.cpp
   src/FileIO/BodyMeasuresCsvImport.cpp src/FileIO/CommPort.cpp
   src/FileIO/Computrainer3dpFile.cpp src/FileIO/CsvRideFile.cpp src/FileIO/DataProcessor.cpp src/FileIO/Device.cpp
-  src/FileIO/FitlogParser.cpp src/FileIO/FitlogRideFile.cpp src/FileIO/FitRideFile.cpp src/FileIO/FixDeriveDistance.cpp
+  src/FileIO/FitlogParser.cpp src/FileIO/FitlogRideFile.cpp src/FileIO/FitRideFile.cpp src/FileIO/FixAeroPod.cpp src/FileIO/FixDeriveDistance.cpp
   src/FileIO/FixDeriveHeadwind.cpp src/FileIO/FixDerivePower.cpp src/FileIO/FixDeriveTorque.cpp src/FileIO/FixElevation.cpp src/FileIO/FixLapSwim.cpp
   src/FileIO/FixFreewheeling.cpp src/FileIO/FixGaps.cpp src/FileIO/FixGPS.cpp src/FileIO/FixRunningCadence.cpp src/FileIO/FixRunningPower.cpp
   src/FileIO/FixHRSpikes.cpp src/FileIO/FixMoxy.cpp src/FileIO/FixPower.cpp src/FileIO/FixSmO2.cpp src/FileIO/FixSpeed.cpp src/FileIO/FixSpikes.cpp
@@ -1316,30 +1154,30 @@ set (GC_SOURCE_FILES ${GC_SOURCE_FILES}
   src/FileIO/SmlRideFile.cpp src/FileIO/Snippets.cpp src/FileIO/SrdRideFile.cpp src/FileIO/SrmRideFile.cpp src/FileIO/SyncRideFile.cpp
   src/FileIO/TacxCafRideFile.cpp src/FileIO/TcxParser.cpp src/FileIO/TcxRideFile.cpp src/FileIO/TxtRideFile.cpp src/FileIO/WkoRideFile.cpp
   src/FileIO/XDataDialog.cpp src/FileIO/XDataTableModel.cpp src/FileIO/FilterHRV.cpp src/FileIO/HrvMeasuresCsvImport.cpp
+  src/FileIO/LocationInterpolation.cpp src/FileIO/TTSReader.cpp
   )
 
 ## GUI Elements and Dialogs
 set (GC_SOURCE_FILES ${GC_SOURCE_FILES}
   src/Gui/AboutDialog.cpp src/Gui/AddIntervalDialog.cpp src/Gui/AnalysisSidebar.cpp src/Gui/ChooseCyclistDialog.cpp src/Gui/ColorButton.cpp
   src/Gui/Colors.cpp src/Gui/CompareDateRange.cpp src/Gui/CompareInterval.cpp src/Gui/ComparePane.cpp src/Gui/ConfigDialog.cpp src/Gui/DiarySidebar.cpp
-  src/Gui/DragBar.cpp src/Gui/EstimateCPDialog.cpp src/Gui/GcCrashDialog.cpp src/Gui/GcScopeBar.cpp
-  src/Gui/GcSideBarItem.cpp src/Gui/GcToolBar.cpp src/Gui/GcWindowLayout.cpp
+  src/Gui/DragBar.cpp src/Gui/EstimateCPDialog.cpp src/Gui/GcCrashDialog.cpp src/Gui/GcSideBarItem.cpp src/Gui/GcToolBar.cpp src/Gui/GcWindowLayout.cpp
   src/Gui/GcWindowRegistry.cpp src/Gui/GenerateHeatMapDialog.cpp src/Gui/GProgressDialog.cpp src/Gui/HelpWhatsThis.cpp src/Gui/HelpWindow.cpp
-  src/Gui/IntervalTreeView.cpp src/Gui/LTMSidebar.cpp src/Gui/MainWindow.cpp src/Gui/NewCyclistDialog.cpp src/Gui/Pages.cpp
-  src/Gui/RideNavigator.cpp src/Gui/SaveDialogs.cpp
+  src/Gui/IntervalTreeView.cpp src/Gui/LTMSidebar.cpp src/Gui/MainWindow.cpp src/Gui/NewCyclistDialog.cpp src/Gui/Pages.cpp src/Gui/RideNavigator.cpp src/Gui/SaveDialogs.cpp
   src/Gui/SearchBox.cpp src/Gui/SearchFilterBox.cpp src/Gui/SolveCPDialog.cpp src/Gui/Tab.cpp src/Gui/TabView.cpp src/Gui/ToolsRhoEstimator.cpp src/Gui/Views.cpp
-  src/Gui/BatchExportDialog.cpp src/Gui/DownloadRideDialog.cpp src/Gui/ManualRideDialog.cpp src/Gui/EditUserMetricDialog.cpp
-  src/Gui/MergeActivityWizard.cpp src/Gui/RideImportWizard.cpp src/Gui/SplitActivityWizard.cpp src/Gui/SolverDisplay.cpp
+  src/Gui/BatchExportDialog.cpp src/Gui/DownloadRideDialog.cpp src/Gui/ManualRideDialog.cpp src/Gui/EditUserMetricDialog.cpp src/Gui/NewMainWindow.cpp src/Gui/NewSideBar.cpp
+  src/Gui/MergeActivityWizard.cpp src/Gui/RideImportWizard.cpp src/Gui/SplitActivityWizard.cpp src/Gui/SolverDisplay.cpp src/Gui/MetricSelect.cpp
+  src/Gui/AddChartWizard.cpp
   )
 
 ## Models and Metrics
 set (GC_SOURCE_FILES ${GC_SOURCE_FILES}
-  src/Metrics/aBikeScore.cpp src/Metrics/aCoggan.cpp src/Metrics/AerobicDecoupling.cpp src/Metrics/BasicRideMetrics.cpp src/Metrics/BikeScore.cpp
-  src/Metrics/Coggan.cpp src/Metrics/CPSolver.cpp src/Metrics/DanielsPoints.cpp src/Metrics/Estimator.cpp src/Metrics/ExtendedCriticalPower.cpp
-  src/Metrics/GOVSS.cpp src/Metrics/HrTimeInZone.cpp src/Metrics/HrZones.cpp src/Metrics/LeftRightBalance.cpp src/Metrics/PaceTimeInZone.cpp
-  src/Metrics/PaceZones.cpp src/Metrics/PDModel.cpp src/Metrics/PeakPace.cpp src/Metrics/PeakPower.cpp src/Metrics/PMCData.cpp src/Metrics/RideMetadata.cpp
-  src/Metrics/RideMetric.cpp src/Metrics/RunMetrics.cpp src/Metrics/SwimMetrics.cpp src/Metrics/SpecialFields.cpp
-  src/Metrics/Statistic.cpp src/Metrics/SustainMetric.cpp src/Metrics/SwimScore.cpp
+  src/Metrics/aBikeScore.cpp src/Metrics/aCoggan.cpp src/Metrics/AerobicDecoupling.cpp src/Metrics/Banister.cpp src/Metrics/BasicRideMetrics.cpp
+  src/Metrics/BikeScore.cpp src/Metrics/Coggan.cpp src/Metrics/CPSolver.cpp src/Metrics/DanielsPoints.cpp src/Metrics/Estimator.cpp
+  src/Metrics/ExtendedCriticalPower.cpp src/Metrics/GOVSS.cpp src/Metrics/HrTimeInZone.cpp src/Metrics/HrZones.cpp src/Metrics/LeftRightBalance.cpp
+  src/Metrics/PaceTimeInZone.cpp src/Metrics/PaceZones.cpp src/Metrics/PDModel.cpp src/Metrics/PeakPace.cpp src/Metrics/PeakPower.cpp src/Metrics/PeakHr.cpp
+  src/Metrics/PMCData.cpp src/Metrics/PowerProfile.cpp src/Metrics/RideMetadata.cpp src/Metrics/RideMetric.cpp src/Metrics/RunMetrics.cpp
+  src/Metrics/SwimMetrics.cpp src/Metrics/SpecialFields.cpp src/Metrics/Statistic.cpp src/Metrics/SustainMetric.cpp src/Metrics/SwimScore.cpp
   src/Metrics/TimeInZone.cpp src/Metrics/TRIMPPoints.cpp src/Metrics/UserMetric.cpp src/Metrics/UserMetricParser.cpp src/Metrics/VDOTCalculator.cpp
   src/Metrics/VDOT.cpp src/Metrics/WattsPerKilogram.cpp src/Metrics/WPrime.cpp src/Metrics/Zones.cpp src/Metrics/HrvMetrics.cpp
   )
@@ -1352,8 +1190,17 @@ set (GC_SOURCE_FILES ${GC_SOURCE_FILES}
 ## Contributed solutions
 set (GC_SOURCE_FILES ${GC_SOURCE_FILES}
   qtsolutions/codeeditor/codeeditor.cpp qtsolutions/json/mvjson.cpp qtsolutions/qwtcurve/qwt_plot_gapped_curve.cpp
-  qxt/src/qxtspanslider.cpp qxt/src/qxtstringspinbox.cpp qzip/zip.cpp
+           qxt/src/qxtspanslider.cpp qxt/src/qxtstringspinbox.cpp qzip/zip.cpp
+           lmfit/lmcurve.c lmfit/lmmin.c
+           levmar/Axb.c
+           #levmar/lm_core.c levmar/lmbc_core.c #
+           #levmar/lmblec_core.c levmar/lmbleic_core.c
+           levmar/lmlec.c levmar/misc.c
+           #levmar/Axb_core.c
+           levmar/lm.c levmar/lmbc.c levmar/lmblec.c levmar/lmbleic.c
+           #levmar/lmlec_core.c levmar/misc_core.c
   )
+# NB. The _core,c files are not used in levmar's CMakeLists.txt file.
 
 ## Train View Components
 set (GC_SOURCE_FILES ${GC_SOURCE_FILES}
@@ -1361,14 +1208,12 @@ set (GC_SOURCE_FILES ${GC_SOURCE_FILES}
   src/Train/DeviceTypes.cpp src/Train/DialWindow.cpp src/Train/ErgDB.cpp src/Train/ErgDBDownloadDialog.cpp src/Train/ErgFile.cpp src/Train/ErgFilePlot.cpp
   src/Train/Library.cpp src/Train/LibraryParser.cpp src/Train/MeterWidget.cpp src/Train/NullController.cpp src/Train/RealtimeController.cpp
   src/Train/RealtimeData.cpp src/Train/RealtimePlot.cpp src/Train/RealtimePlotWindow.cpp src/Train/RemoteControl.cpp src/Train/SpinScanPlot.cpp
-  src/Train/SpinScanPlotWindow.cpp src/Train/SpinScanPolarPlot.cpp src/Train/GarminServiceHelper.cpp
+  src/Train/SpinScanPlotWindow.cpp src/Train/SpinScanPolarPlot.cpp src/Train/GarminServiceHelper.cpp src/Train/PhysicsUtility.cpp src/Train/BicycleSim.cpp
   )
 
-if (USE_QT5)
-  set (GC_SOURCE_FILES ${GC_SOURCE_FILES}
-    src/Train/TodaysPlanWorkoutDownload.cpp
-    )
-endif (USE_QT5)
+set (GC_SOURCE_FILES ${GC_SOURCE_FILES} # Qt 5
+  src/Train/TodaysPlanWorkoutDownload.cpp
+  )
 
 set (GC_SOURCE_FILES ${GC_SOURCE_FILES}
   src/Train/TrainBottom.cpp src/Train/TrainDB.cpp src/Train/TrainSidebar.cpp
@@ -1383,28 +1228,15 @@ if (MSVC)
     )
 endif (MSVC)
 
-if (USE_QT5) # Qt 5
-  
-  #qt5_wrap_ui (GC_FORMS_HEADER_FILES ${GC_FORMS})
-  #qt5_wrap_cpp (GC_HEADER_FILES_MOC ${GC_HEADER_FILES})
-  #set (GC_FORMS_HEADER_FILES ${GC_FORMS}) # We use AUTOMUIC ON
-  set (GC_HEADER_FILES_MOC ${GC_HEADER_FILES}) # We use AUTOMOC ON
-  set (GC_RCC_FILES ${GC_RESOURCES})	       # We use AUTORCC ON
-  set (QWT_HEADER_FILES_MOC ${QWT_HEADER_FILES}) # We use AUTOMOC ON
-  #set (QXT_HEADER_FILES_MOC ${QXT_HEADER_FILES}) # We use AUTOMOC ON
-
-else (USE_QT5) # Qt 4
-
-  #qt4_wrap_ui(GC_FORMS_HEADER_FILES ${GC_FORMS})
-  qt4_wrap_cpp (GC_HEADER_FILES_MOC ${GC_HEADER_FILES})
-  qt4_wrap_cpp (QWT_HEADER_FILES_MOC ${QWT_HEADER_FILES})
-  qt4_wrap_cpp (QXT_HEADER_FILES_MOC ${QXT_HEADER_FILES})
-
-endif (USE_QT5)
+#qt5_wrap_ui (GC_FORMS_HEADER_FILES ${GC_FORMS})
+#qt5_wrap_cpp (GC_HEADER_FILES_MOC ${GC_HEADER_FILES})
+#set (GC_FORMS_HEADER_FILES ${GC_FORMS}) # We use AUTOMUIC ON
+set (GC_HEADER_FILES_MOC ${GC_HEADER_FILES}) # We use AUTOMOC ON
+set (GC_RCC_FILES ${GC_RESOURCES})	       # We use AUTORCC ON
+set (QWT_HEADER_FILES_MOC ${QWT_HEADER_FILES}) # We use AUTOMOC ON
+#set (QXT_HEADER_FILES_MOC ${QXT_HEADER_FILES}) # We use AUTOMOC ON
 
 include_directories (
-  
-  if (USE_QT5)
     ${Qt5Widgets_INCLUDE_DIRS}
     ${Qt5Gui_INCLUDE_DIRS}
     ${Qt5Core_INCLUDE_DIRS}
@@ -1419,7 +1251,7 @@ include_directories (
       ${Qt5WebEngineCore_INCLUDE_DIRS}
       ${Qt5WebEngineWidgets_INCLUDE_DIRS}
       ${Qt5WebChannel_INCLUDE_DIRS}
-      ${Qt5Positioning_INCLUDE_DIRS}      
+      ${Qt5Positioning_INCLUDE_DIRS}
     endif (NOT NOWEBKIT)
     ${Qt5Bluetooth_INCLUDE_DIRS}     # TODO make optional.
     ${Qt5Charts_INCLUDE_DIRS}	     # TODO make optional.
@@ -1434,39 +1266,36 @@ include_directories (
   ${CMAKE_CURRENT_BINARY_DIR} # May be needed to find generated (ui_*.h) files (see https://anteru.net/2009/09/07/582/).
   )
 
-if (USE_QT5)
-  set (GC_QT_LIBS "Qt5::Widgets")
-  set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::Core") 
-  #set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::LinguistTools")
-  set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::Xml")
-  set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::Sql") 
-  set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::Network")
-  set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::Svg")
-  set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::Concurrent")
-  set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::SerialPort")
-  set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::Multimedia")
-  set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::MultimediaWidgets")
-  if (NOT NOWEBKIT)
-    set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::WebKitWidgets") # TODO make optional.
-  else (NOT NOWEBKIT)
-    set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::WebEngine")
-    set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::WebEngineCore")
-    set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::WebEngineWidgets")
-    set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::WebChannel")
-    set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::Positioning")
-  endif (NOT NOWEBKIT)
-  set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::Bluetooth") # TODO make optional.
-  set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::Charts") # TODO make optional.
-  set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::OpenGL") # TODO make optional.
-  set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::PrintSupport")
-else (USE_QT5)
-  set (GC_QT_LIBS "${QT_LIBRARIES}")
-endif (USE_QT5)
+set (GC_QT_LIBS "Qt5::Widgets")
+set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::Core")
+#set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::LinguistTools")
+set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::Xml")
+set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::Sql")
+set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::Network")
+set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::Svg")
+set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::Concurrent")
+set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::SerialPort")
+set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::Multimedia")
+set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::MultimediaWidgets")
+#if (NOT NOWEBKIT)
+#  set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::WebKitWidgets") # TODO make optional.
+#else (NOT NOWEBKIT)
+set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::WebEngine")
+set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::WebEngineCore")
+set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::WebEngineWidgets")
+set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::WebChannel")
+set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::Positioning")
+#endif (NOT NOWEBKIT)
+set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::Bluetooth") # TODO make optional.
+set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::Charts") # TODO make optional.
+set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::OpenGL") # TODO make optional.
+set (GC_QT_LIBS ${GC_QT_LIBS} "Qt5::PrintSupport")
+
 
 add_executable(GoldenCheetah
   ${GC_HEADER_FILES_MOC}
   ${GC_RCC_FILES}
-  ${GC_SOURCE_FILES} 
+  ${GC_SOURCE_FILES}
   ${QWT_HEADER_FILES_MOC}
   ${QWT_SOURCE_FILES}
   ${QXT_HEADER_FILES_MOC}
@@ -1477,6 +1306,7 @@ add_executable(GoldenCheetah
 target_link_libraries (GoldenCheetah
   ${GC_QT_LIBS}
   ${ZLIB_LIBRARIES}		# TODO add this only when needed.
+  ${GSL_LIBRARIES}
   ${GC_OPT_LIBS}
   #${QWT_LIBRARIES}
   )
@@ -1488,4 +1318,8 @@ install (TARGETS GoldenCheetah
   RUNTIME DESTINATION bin
   )
 
+###====================
+### MISCELLANEOUS FILES
+###====================
 
+#OTHER_FILES +=   Resources/python/library.py Python/SIP/goldencheetah.sip
