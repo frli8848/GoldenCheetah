@@ -41,7 +41,7 @@
 #include <QTimer>
 
 // geometry basics
-#define SPACING 80
+#define __SPACING__ 80
 #define ROWHEIGHT 80
 
 class ChartSpace;

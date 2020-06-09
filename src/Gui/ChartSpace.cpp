@@ -305,11 +305,11 @@ ChartSpace::updateGeometry()
     // order the items to their positions
     qSort(items.begin(), items.end(), ChartSpaceItemSort);
 
-    int y=SPACING;
+    int y=__SPACING__;
     int maxy = y;
     int column=-1;
 
-    int x=SPACING;
+    int x=__SPACING__;
 
     // just set their geometry for now, no interaction
     for(int i=0; i<items.count(); i++) {
@@ -321,7 +321,7 @@ ChartSpace::updateGeometry()
         if (items[i]->column > column) {
 
             // once past the first column we need to update x
-            if (column >= 0) x+= columns[column] + SPACING;
+            if (column >= 0) x+= columns[column] + __SPACING__;
 
             int diff = items[i]->column - column - 1;
             if (diff > 0) {
@@ -332,7 +332,7 @@ ChartSpace::updateGeometry()
                 for(int j=items[i]->column-1; j < 8; j++) columns[j]=columns[j+1];
                 for(int j=i; j<items.count();j++) items[j]->column -= diff;
             }
-            y=SPACING; column = items[i]->column;
+            y=__SPACING__; column = items[i]->column;
 
         }
 
@@ -347,7 +347,7 @@ ChartSpace::updateGeometry()
 
 
         // for setting the scene rectangle - but ignore a ChartSpaceItem if we are dragging it
-        if (maxy < ty+theight+SPACING) maxy = ty+theight+SPACING;
+        if (maxy < ty+theight+__SPACING__) maxy = ty+theight+__SPACING__;
 
         // add to scene if new
         if (!items[i]->onscene) {
@@ -380,11 +380,11 @@ ChartSpace::updateGeometry()
         }
 
         // set spot for next tile
-        y += theight + SPACING;
+        y += theight + __SPACING__;
     }
 
     // set the scene rectangle, columns start at 0
-    sceneRect = QRectF(0, 0, columns[column] + x + SPACING, maxy);
+    sceneRect = QRectF(0, 0, columns[column] + x + __SPACING__, maxy);
 
     if (animated) group->start();
 }
@@ -861,14 +861,14 @@ ChartSpace::eventFilter(QObject *, QEvent *event)
 
                 // columns are now variable width
                 // create a new column to the right?
-                int x=SPACING;
+                int x=__SPACING__;
                 int targetcol = -1;
                 for(int i=0; i<10; i++) {
-                    if (pos.x() > x && pos.x() < (x+columns[i]+SPACING)) {
+                    if (pos.x() > x && pos.x() < (x+columns[i]+__SPACING__)) {
                         targetcol = i;
                         break;
                     }
-                    x += columns[i]+SPACING;
+                    x += columns[i]+__SPACING__;
                 }
 
                 if (items.last()->column < 9 && targetcol < 0) {
