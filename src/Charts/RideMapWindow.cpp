@@ -470,8 +470,8 @@ void RideMapWindow::createHtml()
             "routeYellow.on('mouseover', function(event) { webBridge.hoverPath(event.latlng.lat, event.latlng.lng); });\n"
             "routeYellow.on('mousemove', function(event) { webBridge.hoverPath(event.latlng.lat, event.latlng.lng); });\n"
 
-            "}\n").arg(styleoptions == "" ? "#FFFF00" : GColor(CPLOTMARKER).name())
-                  .arg(styleoptions == "" ? 0.4 : 1.0);
+            "}\n").arg(styleoptions == "" ? "#000000" : GColor(CPLOTMARKER).name())
+                  .arg(styleoptions == "" ? 1.0 : 1.0);
     }
     else if (mapCombo->currentIndex() == GOOGLE) {
 
@@ -484,7 +484,7 @@ void RideMapWindow::createHtml()
            "    var routeOptionsYellow = {\n"
            "        strokeColor: '%1',\n"
            "        strokeOpacity: %2,\n"
-           "        strokeWeight: 10,\n"
+           "        strokeWeight: 4,\n"
            "        zIndex: -2\n"
            "    };\n"
 
@@ -505,8 +505,8 @@ void RideMapWindow::createHtml()
            "    google.maps.event.addListener(routeYellow, 'mouseup',   function(event) { map.setOptions({draggable: true, zoomControl: true, scrollwheel: true, disableDoubleClickZoom: false}); webBridge.mouseup(); });\n"
            "    google.maps.event.addListener(routeYellow, 'mouseover', function(event) { webBridge.hoverPath(event.latLng.lat(), event.latLng.lng()); });\n"
 
-           "}\n").arg(styleoptions == "" ? "#FFFF00" : GColor(CPLOTMARKER).name())
-                 .arg(styleoptions == "" ? 0.4f : 1.0f);
+           "}\n").arg(styleoptions == "" ? "#000000" : GColor(CPLOTMARKER).name())
+                 .arg(styleoptions == "" ? 1.0f : 1.0f);
     }
 
     currentPage += QString("function drawIntervals() { \n"
@@ -623,7 +623,7 @@ void RideMapWindow::createHtml()
             "   var polyOptions = {\n"
             "       strokeColor: '#0000FF',\n"
             "       strokeOpacity: 0.6,\n"
-            "       strokeWeight: 10,\n"
+            "       strokeWeight: 4,\n"
             "       zIndex: -1\n"  // put at the bottom
             "   }\n"
             "   var intervalHighlighter = new google.maps.Polyline(polyOptions);\n"
@@ -742,7 +742,7 @@ QColor RideMapWindow::GetColor(int watts)
 void
 RideMapWindow::drawShadedRoute()
 {
-    int intervalTime = 60;  // 60 seconds
+    int intervalTime = 5;  // 5 seconds
     double rtime=0; // running total for accumulated data
     int count=0;  // how many samples ?
     int rwatts=0; // running total of watts
@@ -813,18 +813,18 @@ RideMapWindow::drawShadedRoute()
                                 "polyline.on('mouseover', function(event) { webBridge.hoverPath(event.latlng.lat, event.latlng.lng); });\n"
                                 "path = polyline.getLatLngs();\n"
                                 "}\n").arg(styleoptions == "" ? color.name() : GColor(CPLOTMARKER).name())
-                                .arg(styleoptions == "" ? 0.5 : 1.0);
+                                .arg(styleoptions == "" ? 1.0 : 1.0);
             } else if (mapCombo->currentIndex() == GOOGLE) {
                 // color the polyline
                 code += QString("var polyOptions = {\n"
                                 "    strokeColor: '%1',\n"
-                                "    strokeWeight: 3,\n"
+                                "    strokeWeight: 4,\n"
                                 "    strokeOpacity: %2,\n" // for out and backs, we need both
                                 "    zIndex: 0,\n"
                                 "}\n"
                                 "polyline.setOptions(polyOptions);\n"
                                 "}\n").arg(styleoptions == "" ? color.name() : GColor(CPLOTMARKER).name())
-                                      .arg(styleoptions == "" ? 0.5f : 1.0f);
+                                      .arg(styleoptions == "" ? 1.0f : 1.0f);
 
             }
             view->page()->runJavaScript(code);
@@ -879,7 +879,7 @@ RideMapWindow::drawTempInterval(IntervalItem *current) {
                     "    var polyOptions = {\n"
                     "        strokeColor: '#00FFFF',\n"
                     "        strokeOpacity: 0.6,\n"
-                    "        strokeWeight: 10,\n"
+                    "        strokeWeight: 4,\n"
                     "        zIndex: -1\n"  // put at the bottom
                     "    }\n"
 

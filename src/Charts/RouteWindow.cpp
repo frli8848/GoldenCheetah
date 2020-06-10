@@ -641,5 +641,3 @@ WebBridgeForRoute::drawOverlays()
     // overlay a shaded route
     gm->drawShadedRoute();
 }
-
-
